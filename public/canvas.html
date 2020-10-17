@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"/>
+<script type="text/javascript" src="svg.js"></script>
+<script type="text/javascript" src="svg.draggy.min.js"></script>
+<script type="text/javascript" src="svg.connectable.js"></script>
+<script>
+let state = {
+    nodes: [
+        // need: createdBy, createdTs, lastChangedBy, lastChangeTs
+        { type:"note", id:"id-local-1", x:10,y:10,width:100,height:100,text:"Node 1",title:"Node 1"},
+        { type:"note", id:"id-local-2", x:110,y:10,width:100,height:100,text:"Node 2",title:"Node 2"},
+        { type:"note", id:"id-local-3", x:210,y:10,width:100,height:100,text:"Node 3",title:"Node 3"},
+    ],
+    joins: [],
+};
+
+function setupGraph() {
+    // let data = JSON.parse(fetch('./nodes'));
+    mkNodes( state.nodes );
+    // mkJoins( nodes, data.joins );
+}
+</script>
+</head>
+<body onload="javascript:setupGraph()">
+    <div id="svgContainer" style="background-color: black;"></div>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg1">
+</svg>
+</div>
+<script type="text/javascript" src="example.js"></script>
+<button onclick="javascript:exportAsSvg()" href="#">Save</button>
+<button onclick="javascript:createNote(nodes)" href="#">Note</button>
+</body>
+</html>
