@@ -6,14 +6,25 @@ var markers = svg.group();
 let nodes = [];
 var defs = svg.defs();
 
+// Later, precompile the templates, maybe in an external file even
+var template = {
+    //note: '<g id="{{id}}" transform="matrix(1,0,0,1,{{x}},{{y}})"><rect id="SvgjsRect1011" width="53.53333282470703" height="23" x="0" y="-8" fill="white" stroke="black"></rect><text id="SvgjsText1009" font-family="Helvetica, Arial, sans-serif" fill="#e91e63" opacity="0.6" svgjs:data="{&quot;leading&quot;:&quot;1.3&quot;}"><tspan id="SvgjsTspan1010" x="0" y="10" fill="crimson" font-weight="bold">{{text}}</tspan></text></g>'
+    note: '<rect width="53.53333282470703" height="23" x="0" y="-8" fill="white" stroke="black"></rect><text id="SvgjsText1009" font-family="Helvetica, Arial, sans-serif" fill="#e91e63" opacity="0.6" svgjs:data="{&quot;leading&quot;:&quot;1.3&quot;}"><tspan id="SvgjsTspan1010" x="0" y="10" fill="crimson" font-weight="bold">{{text}}</tspan></text>'
+};
+
 function mkNote(svg,nodeInfo) {
     let id = nodeInfo.id;
 
     // Fill the template
 
+    let myTemplate = Handlebars.compile(template['note']);
+    let str = myTemplate(nodeInfo);
+    //let newNode = SVG(str);
+    //let g = svg.group({ id: nodeInfo.id, "x":nodeInfo.x, "y": nodeInfo.y }).draggy();
+    //g.add(newNode);
+
     let t = svg.text((t) => {
-        t.tspan(nodeInfo.text).attr({"x":0, "y":10,"fill":"crimson","font-weight":"bold"});
-        // let ofs = 15;
+        t.tspan(nodeInfo.text).attr({"x":nodeInfo.x, "y":nodeInfo.y,"fill":"crimson","font-weight":"bold"});
     });
     t.fill("#E91E63").opacity(0.6);
     var b = t.bbox();
@@ -22,15 +33,13 @@ function mkNote(svg,nodeInfo) {
     g.add(border);
     g.add(t);
 
-    g.move( nodeInfo.x, nodeInfo.y );
-
     g.on('dragmove', function(event) {
         // Broadcast new position, every 0.5 seconds
         var info = {
             from : { x: null, y: null },
             to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
         };
-        console.log("Moving: "+name+" at ",info,event.detail);
+        //console.log("Moving: "+name+" at ",info,event.detail);
     });
     g.on('dragend', (event) => {
         // Save the new coordinates in the backend
