@@ -9,29 +9,33 @@ var defs = svg.defs();
 // Later, precompile the templates, maybe in an external file even
 var template = {
     //note: '<g id="{{id}}" transform="matrix(1,0,0,1,{{x}},{{y}})"><rect id="SvgjsRect1011" width="53.53333282470703" height="23" x="0" y="-8" fill="white" stroke="black"></rect><text id="SvgjsText1009" font-family="Helvetica, Arial, sans-serif" fill="#e91e63" opacity="0.6" svgjs:data="{&quot;leading&quot;:&quot;1.3&quot;}"><tspan id="SvgjsTspan1010" x="0" y="10" fill="crimson" font-weight="bold">{{text}}</tspan></text></g>'
-    note: '<rect width="53.53333282470703" height="23" x="0" y="-8" fill="white" stroke="black"></rect><text id="SvgjsText1009" font-family="Helvetica, Arial, sans-serif" fill="#e91e63" opacity="0.6" svgjs:data="{&quot;leading&quot;:&quot;1.3&quot;}"><tspan id="SvgjsTspan1010" x="0" y="10" fill="crimson" font-weight="bold">{{text}}</tspan></text>'
+    note: '<rect width="53.53333282470703" height="23" x="0" y="-8" fill="yellow" stroke="black"></rect><text font-family="Helvetica, Arial, sans-serif" fill="#e91e63" opacity="0.6" svgjs:data="{&quot;leading&quot;:&quot;1.3&quot;}"><tspan id="SvgjsTspan1010" x="0" y="10" fill="crimson" font-weight="bold">{{text}}</tspan></text>'
 };
 
 function mkNote(svg,nodeInfo) {
     let id = nodeInfo.id;
 
     // Fill the template
+    // We need to do that in code as we have lots of interdependencies here
 
-    let myTemplate = Handlebars.compile(template['note']);
-    let str = myTemplate(nodeInfo);
-    //let newNode = SVG(str);
-    //let g = svg.group({ id: nodeInfo.id, "x":nodeInfo.x, "y": nodeInfo.y }).draggy();
-    //g.add(newNode);
+    //let myTemplate = Handlebars.compile(template['note']);
+    //let str = myTemplate(nodeInfo);
+    // let newNode = svg.svg(str);
 
     let t = svg.text((t) => {
-        t.tspan(nodeInfo.text).attr({"x":nodeInfo.x, "y":nodeInfo.y,"fill":"crimson","font-weight":"bold"});
+        t.tspan(nodeInfo.text).attr({"fill":"black","font-weight":"bold"});
     });
-    t.fill("#E91E63").opacity(0.6);
-    var b = t.bbox();
-    var border = svg.rect(b.width, b.height).move(b.x,b.y).attr({"fill":"white","stroke":"black"});
-    var g = svg.group().draggy();
-    g.add(border);
+    let b = svg.rect().attr({"fill":"#ffe840"}).size(nodeInfo.width,nodeInfo.height);
+    let bb = b.bbox();
+
+    var g = svg.group().attr({"id":nodeInfo.id})
+        .draggy()
+    g.add(b);
     g.add(t);
+    console.log(bb.cx,bb.cy);
+    t.center(bb.cx,bb.cy);
+    g.move(nodeInfo.x, nodeInfo.y);
+    //g.svg(str);
 
     g.on('dragmove', function(event) {
         // Broadcast new position, every 0.5 seconds

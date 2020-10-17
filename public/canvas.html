@@ -25,9 +25,19 @@ function setupGraph() {
     // mkJoins( nodes, data.joins );
 }
 </script>
+<style>
+.node-vertical__inactive {
+  filter:url(#shadow);
+}
+</style>
 </head>
 <body onload="javascript:setupGraph()">
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg1">
+    <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="200%" height="200%">
+      <feDropShadow dx="20" dy="3" stdDeviation="5" flood-color="#5091b9" />
+    </filter>
+        </defs>
 </svg>
 <script type="text/javascript" src="example.js"></script>
 <button onclick="javascript:exportAsSvg()" href="#">Save</button>
