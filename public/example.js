@@ -6,11 +6,54 @@ var markers = svg.group();
 let nodes = [];
 var defs = svg.defs();
 
+/*
 // Later, precompile the templates, maybe in an external file even
 var template = {
     //note: '<g id="{{id}}" transform="matrix(1,0,0,1,{{x}},{{y}})"><rect id="SvgjsRect1011" width="53.53333282470703" height="23" x="0" y="-8" fill="white" stroke="black"></rect><text id="SvgjsText1009" font-family="Helvetica, Arial, sans-serif" fill="#e91e63" opacity="0.6" svgjs:data="{&quot;leading&quot;:&quot;1.3&quot;}"><tspan id="SvgjsTspan1010" x="0" y="10" fill="crimson" font-weight="bold">{{text}}</tspan></text></g>'
     note: '<rect width="53.53333282470703" height="23" x="0" y="-8" fill="yellow" stroke="black"></rect><text font-family="Helvetica, Arial, sans-serif" fill="#e91e63" opacity="0.6" svgjs:data="{&quot;leading&quot;:&quot;1.3&quot;}"><tspan id="SvgjsTspan1010" x="0" y="10" fill="crimson" font-weight="bold">{{text}}</tspan></text>'
 };
+*/
+
+function addSelectionOverlay(svg,singleItem) {
+
+    // remove old overlay, if any:
+    let oldOverlay = SVG.get("overlay");
+    if( oldOverlay ) {
+        let containedId = oldOverlay.data("overlaid");
+        let contained = SVG.get(containedId);
+
+        let cx = oldOverlay.cx();
+        let cy = oldOverlay.cy();
+        oldOverlay.replace(contained);
+
+        // Move the contained object into the correct position
+        contained.center(cx,cy);
+
+        contained.removeClass('overlaid');
+    };
+
+    let item = SVG.get(singleItem);
+    let bb = item.bbox();
+    let overlay = svg.group().attr({"id":"overlay"})
+        .draggy();
+    let r = svg.rect();
+    r.attr({"stroke":"black", "stroke-width":3, "fill-opacity":0});
+    r.size(bb.w+2,bb.h+2);
+    r.center(item.cx(),item.cy());
+    item.addClass('overlaid');
+
+    overlay.add(item);
+    overlay.add(r);
+    overlay.data("overlaid",item,true); // We want to store an object reference
+    // Add eight svg.circle()
+    // draggy.constrain() the n,e,s,w circles to move only on their axis
+    // line up the corners when dragging the edges, line up the edges when
+    // dragging the corners
+    // remove the svg.circle() if the current container loses focus
+    // Also, log any moving, for later communication
+
+    return overlay
+}
 
 function mkNote(svg,nodeInfo) {
     let id = nodeInfo.id;
@@ -28,14 +71,21 @@ function mkNote(svg,nodeInfo) {
     let b = svg.rect().attr({"fill":"#ffe840"}).size(nodeInfo.width,nodeInfo.height);
     let bb = b.bbox();
 
-    var g = svg.group().attr({"id":nodeInfo.id})
-        .draggy()
+    var g = svg.group().attr({"id":nodeInfo.id});
     g.add(b);
     g.add(t);
-    console.log(bb.cx,bb.cy);
     t.center(bb.cx,bb.cy);
+
     g.move(nodeInfo.x, nodeInfo.y);
-    //g.svg(str);
+
+    // We also need to handle touchstart, see draggy.js source
+    // In the middle/long run, we need to ditch draggy completely, so we
+    // can add our overlay _and_ drag with a single click
+    // Also, editing the text also is broken here, so maybe we need an
+    // alltogether different approach
+    g.on('mousedown', (event) => {
+        let overlay = addSelectionOverlay(svg, nodeInfo.id);
+    });
 
     g.on('dragmove', function(event) {
         // Broadcast new position, every 0.5 seconds
