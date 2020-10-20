@@ -77,8 +77,35 @@ function addSelectionOverlay(svg,singleItem) {
     });
     overlay.add(s);
 
+    let nw = svg.circle(8);
+    nw.center(0+item.x(),0+item.y());
+    nw.draggy((x,y) => {
+        return {"x":x,"y":y}
+    });
+    overlay.add(nw);
 
-    e.on("dragmove", (event) => {
+    let ne = svg.circle(8);
+    ne.center(item.x()+bb.w,0+item.y());
+    ne.draggy((x,y) => {
+        return {"x":x,"y":y}
+    });
+    overlay.add(ne);
+
+    let se = svg.circle(8);
+    se.center(item.x()+bb.w,bb.h+item.y());
+    se.draggy((x,y) => {
+        return {"x":x,"y":y}
+    });
+    overlay.add(se);
+
+    let sw = svg.circle(8);
+    sw.center(item.x()+0,bb.h+item.y());
+    sw.draggy((x,y) => {
+        return {"x":x,"y":y}
+    });
+    overlay.add(sw);
+
+    let dragmove_side = (event) => {
         let info = {
             from : { x: null, y: null },
             to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
@@ -90,77 +117,73 @@ function addSelectionOverlay(svg,singleItem) {
         mainItem.size(newbb.w, newbb.h);
         item.move(w.cx(),n.cy());
 
-        // now, reposition all drag handles
-        // adjust the draggy overlay to cover the real element again
-        // do we need the overlay at all?!
-    });
+        // Adjust the four corner handles
+        nw.center(item.x(),        item.y());
+        ne.center(item.x()+newbb.w,item.y());
+        sw.center(item.x(),        item.y()+newbb.h);
+        se.center(item.x()+newbb.w,item.y()+newbb.h);
+
+        // Adjust the four side handles
+        n.center(item.x()+newbb.w/2,item.y()        );
+        s.center(item.x()+newbb.w/2,item.y()+newbb.h);
+        w.center(item.x()        ,  item.y()+newbb.h/2);
+        e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
+
+        console.log("Moved to", w.cx(), n.cy(), newbb);
+    };
+
+    let dragmove_corner = (event) => {
+        let info = {
+            from : { x: null, y: null },
+            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+        };
+
+        // Reconstruct width/height, then set it
+        let bb = mainItem.bbox();
+        // Find which handle we moved, and adjust the two neighbouring
+        // handles accordingly...
+        if( event.target === nw.node ) {
+            sw.cx( nw.cx() );
+            ne.cy( nw.cy() );
+        };
+        if( event.target === ne.node ) {
+            nw.cy( ne.cy() );
+            se.cx( ne.cx() );
+        };
+        if( event.target === sw.node ) {
+            nw.cx( sw.cx() );
+            se.cy( sw.cy() );
+        };
+        if( event.target === se.node ) {
+            ne.cx( se.cx() );
+            sw.cy( se.cy() );
+        };
+
+        let newbb = {'w':ne.cx()-nw.cx(),'h':sw.cy()-ne.cy()};
+        mainItem.size(newbb.w, newbb.h);
+        item.move(nw.cx(),nw.cy());
+        console.log(event);
+
+        // Adjust the four side handles
+        n.center(item.x()+newbb.w/2,item.y()        );
+        s.center(item.x()+newbb.w/2,item.y()+newbb.h);
+        w.center(item.x()        ,  item.y()+newbb.h/2);
+        e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
+    };
+
+    n.on("dragmove", dragmove_side );
+    e.on("dragmove", dragmove_side );
+    s.on("dragmove", dragmove_side );
+    w.on("dragmove", dragmove_side );
     e.on("dragend", (event) => {
         let bb = mainItem.bbox();
         console.log("End dimensions",bb);
     });
 
-    w.on("dragmove", (event) => {
-        let info = {
-            from : { x: null, y: null },
-            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
-        };
-
-        // Reconstruct width/height, then set it
-        let bb = mainItem.bbox();
-
-        // Resize the items _in_ this group, not the group!
-        // Do we want special behaviour for each template?!
-        // let newbb = {'w':bb.x2-info.to.x,'h':bb.h};
-        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
-        mainItem.size(newbb.w, newbb.h);
-        item.move(w.cx(),n.cy());
-
-        // now, reposition all drag handles
-        // adjust the draggy overlay to cover the real element again
-        // do we need the overlay at all?!
-    });
-
-    n.on("dragmove", (event) => {
-        let info = {
-            from : { x: null, y: null },
-            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
-        };
-
-        // Reconstruct width/height, then set it
-        let bb = mainItem.bbox();
-
-        // Resize the items _in_ this group, not the group!
-        // Do we want special behaviour for each template?!
-        // let newbb = {'w':bb.x2-info.to.x,'h':bb.h};
-        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
-        mainItem.size(newbb.w, newbb.h);
-        item.move(w.cx(),n.cy());
-
-        // now, reposition all drag handles
-        // adjust the draggy overlay to cover the real element again
-        // do we need the overlay at all?!
-    });
-
-    s.on("dragmove", (event) => {
-        let info = {
-            from : { x: null, y: null },
-            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
-        };
-
-        // Reconstruct width/height, then set it
-        let bb = mainItem.bbox();
-
-        // Resize the items _in_ this group, not the group!
-        // Do we want special behaviour for each template?!
-        // let newbb = {'w':bb.x2-info.to.x,'h':bb.h};
-        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
-        mainItem.size(newbb.w, newbb.h);
-        item.move(w.cx(),n.cy());
-
-        // now, reposition all drag handles
-        // adjust the draggy overlay to cover the real element again
-        // do we need the overlay at all?!
-    });
+    nw.on("dragmove",dragmove_corner);
+    sw.on("dragmove",dragmove_corner);
+    ne.on("dragmove",dragmove_corner);
+    se.on("dragmove",dragmove_corner);
 
     // draggy.constrain() the n,e,s,w circles to move only on their axis
     // line up the corners when dragging the edges, line up the edges when
