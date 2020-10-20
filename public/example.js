@@ -33,9 +33,11 @@ function addSelectionOverlay(svg,singleItem) {
     };
 
     let item = SVG.get(singleItem);
-    let bb = item.bbox();
-    let overlay = svg.group().attr({"id":"overlay"})
-        .draggy();
+    let mainItem = SVG.select('.main',item.node).first();
+
+    let bb = mainItem.bbox();
+    let overlay = svg.group().attr({"id":"overlay"});
+        //.draggy();
     let r = svg.rect();
     r.attr({"stroke":"black", "stroke-width":3, "fill-opacity":0});
     r.size(bb.w+2,bb.h+2);
@@ -45,7 +47,65 @@ function addSelectionOverlay(svg,singleItem) {
     overlay.add(item);
     overlay.add(r);
     overlay.data("overlaid",item,true); // We want to store an object reference
-    // Add eight svg.circle()
+
+    // Add eight svg.circle() as handles for sizing the selection
+    let w = svg.circle(8);
+    w.center(0+item.x(),item.y()+bb.h/2);
+    w.draggy((x,y) => {
+        return {"x":x,"y":false}
+    });
+    overlay.add(w);
+
+    let e = svg.circle(8);
+    e.center(bb.w+item.x(),item.y()+bb.h/2);
+    e.draggy((x,y) => {
+        return {"x":x,"y":false}
+    });
+    overlay.add(e);
+
+    e.on("dragmove", (event) => {
+        let info = {
+            from : { x: null, y: null },
+            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+        };
+
+        // Reconstruct width/height, then set it
+        let bb = mainItem.bbox();
+        let newbb = {'w':e.cx()-w.cx(),'h':bb.h};
+        console.log("New", newbb);
+        mainItem.size(newbb.w, newbb.h);
+        item.move(w.cx(),item.y());
+
+        // now, reposition all drag handles
+        // adjust the draggy overlay to cover the real element again
+        // do we need the overlay at all?!
+    });
+    e.on("dragend", (event) => {
+        let bb = mainItem.bbox();
+        console.log("End dimensions",bb);
+    });
+    w.on("dragmove", (event) => {
+        let info = {
+            from : { x: null, y: null },
+            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+        };
+
+        // Reconstruct width/height, then set it
+        let bb = mainItem.bbox();
+
+        // Resize the items _in_ this group, not the group!
+        // Do we want special behaviour for each template?!
+        // let newbb = {'w':bb.x2-info.to.x,'h':bb.h};
+        let newbb = {'w':e.cx()-w.cx(),'h':bb.h};
+        mainItem.size(newbb.w, newbb.h);
+        item.move(w.cx(),item.y());
+
+        // now, reposition all drag handles
+        // adjust the draggy overlay to cover the real element again
+        // do we need the overlay at all?!
+    });
+    overlay.add(w);
+
     // draggy.constrain() the n,e,s,w circles to move only on their axis
     // line up the corners when dragging the edges, line up the edges when
     // dragging the corners
@@ -69,11 +129,14 @@ function mkNote(svg,nodeInfo) {
         t.tspan(nodeInfo.text).attr({"fill":"black","font-weight":"bold"});
     });
     let b = svg.rect().attr({"fill":"#ffe840"}).size(nodeInfo.width,nodeInfo.height);
+    b.addClass('main');
     let bb = b.bbox();
 
     var g = svg.group().attr({"id":nodeInfo.id});
     g.add(b);
     g.add(t);
+
+    // Text is allowed to bleed out of the "paper"
     t.center(bb.cx,bb.cy);
 
     g.move(nodeInfo.x, nodeInfo.y);
@@ -87,6 +150,7 @@ function mkNote(svg,nodeInfo) {
         let overlay = addSelectionOverlay(svg, nodeInfo.id);
     });
 
+    /*
     g.on('dragmove', function(event) {
         // Broadcast new position, every 0.5 seconds
         var info = {
@@ -109,6 +173,7 @@ function mkNote(svg,nodeInfo) {
         // sizeSection( tableInfo.section );
 
     });
+    */
     nodes.push(g);
     return g;
 }
