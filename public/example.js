@@ -63,6 +63,21 @@ function addSelectionOverlay(svg,singleItem) {
     });
     overlay.add(e);
 
+    let n = svg.circle(8);
+    n.center(bb.w/2+item.x(),item.y()+0);
+    n.draggy((x,y) => {
+        return {"x":false,"y":y}
+    });
+    overlay.add(n);
+
+    let s = svg.circle(8);
+    s.center(bb.w/2+item.x(),item.y()+bb.h);
+    s.draggy((x,y) => {
+        return {"x":false,"y":y}
+    });
+    overlay.add(s);
+
+
     e.on("dragmove", (event) => {
         let info = {
             from : { x: null, y: null },
@@ -71,10 +86,9 @@ function addSelectionOverlay(svg,singleItem) {
 
         // Reconstruct width/height, then set it
         let bb = mainItem.bbox();
-        let newbb = {'w':e.cx()-w.cx(),'h':bb.h};
-        console.log("New", newbb);
+        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
         mainItem.size(newbb.w, newbb.h);
-        item.move(w.cx(),item.y());
+        item.move(w.cx(),n.cy());
 
         // now, reposition all drag handles
         // adjust the draggy overlay to cover the real element again
@@ -84,6 +98,7 @@ function addSelectionOverlay(svg,singleItem) {
         let bb = mainItem.bbox();
         console.log("End dimensions",bb);
     });
+
     w.on("dragmove", (event) => {
         let info = {
             from : { x: null, y: null },
@@ -96,15 +111,56 @@ function addSelectionOverlay(svg,singleItem) {
         // Resize the items _in_ this group, not the group!
         // Do we want special behaviour for each template?!
         // let newbb = {'w':bb.x2-info.to.x,'h':bb.h};
-        let newbb = {'w':e.cx()-w.cx(),'h':bb.h};
+        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
         mainItem.size(newbb.w, newbb.h);
-        item.move(w.cx(),item.y());
+        item.move(w.cx(),n.cy());
 
         // now, reposition all drag handles
         // adjust the draggy overlay to cover the real element again
         // do we need the overlay at all?!
     });
-    overlay.add(w);
+
+    n.on("dragmove", (event) => {
+        let info = {
+            from : { x: null, y: null },
+            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+        };
+
+        // Reconstruct width/height, then set it
+        let bb = mainItem.bbox();
+
+        // Resize the items _in_ this group, not the group!
+        // Do we want special behaviour for each template?!
+        // let newbb = {'w':bb.x2-info.to.x,'h':bb.h};
+        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
+        mainItem.size(newbb.w, newbb.h);
+        item.move(w.cx(),n.cy());
+
+        // now, reposition all drag handles
+        // adjust the draggy overlay to cover the real element again
+        // do we need the overlay at all?!
+    });
+
+    s.on("dragmove", (event) => {
+        let info = {
+            from : { x: null, y: null },
+            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+        };
+
+        // Reconstruct width/height, then set it
+        let bb = mainItem.bbox();
+
+        // Resize the items _in_ this group, not the group!
+        // Do we want special behaviour for each template?!
+        // let newbb = {'w':bb.x2-info.to.x,'h':bb.h};
+        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
+        mainItem.size(newbb.w, newbb.h);
+        item.move(w.cx(),n.cy());
+
+        // now, reposition all drag handles
+        // adjust the draggy overlay to cover the real element again
+        // do we need the overlay at all?!
+    });
 
     // draggy.constrain() the n,e,s,w circles to move only on their axis
     // line up the corners when dragging the edges, line up the edges when
