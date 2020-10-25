@@ -6,8 +6,18 @@ var markers = svg.group();
 let nodes = [];
 var defs = svg.defs();
 
-let uplink = new WebSocket("ws://localhost:3000/uplink");
-let boardname = window.location.href.substr(window.location.href.lastIndexOf("/")+1);
+let loc = window.location;
+let href = loc.href;
+
+let parts = href.match(/^http(s?):\/\/(.*\/)([\w\.]+)$/);
+if(! parts) {
+    console.log("Don't understand the URL '"+href+"'");
+};
+
+let ws_uri = 'ws' + parts[1] + "://" + parts[2] + '../uplink';
+console.log("Connecting to " + ws_uri);
+let uplink = new WebSocket(ws_uri);
+let boardname = parts[3];
 
 uplink.onopen = (event) => {
     uplink.send(JSON.stringify({
