@@ -258,7 +258,7 @@ function makeNote(svg, attrs) {
 
 // Ideally, recreate the note, instead of patching
 // see morphdom, maybe
-function updateNote(svg, note, foreign, attrs) {
+function updateNote(svg, note, attrs) {
     console.log("Switched out of text editing", event.target);
     console.log("Updating note with", attrs);
     // Actually, we should regenerate our complete node here
@@ -310,7 +310,7 @@ function startTextEditing( event ) {
                     let bb = SVG.select('.main', note.node).first().bbox();
                     let info = getNoteInfo(note);
                     info.text = textdiv.textContent;
-                    updateNote(svg, note, myforeign, info);
+                    updateNote(svg, editedNode, info);
                     state_editedNode = undefined;
                     svg.off("click");
                 };
