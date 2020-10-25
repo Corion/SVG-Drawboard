@@ -34,7 +34,17 @@ uplink.onmessage = (event) => {
         && /^(dragend|textedit)$/.test(msg.action)) {
         // Last edit wins
         // We need to handle the user selection
+        let oldOverlay = SVG.get("overlay");
+        let moveOverlay = false;
+        if( oldOverlay ) {
+            let containedId = oldOverlay.data("overlaid");
+            moveOverlay = containedId === msg.info.id;
+        };
+
         makeNote(svg,msg.info);
+        if( moveOverlay ) {
+            addSelectionOverlay(svg, msg.info.id);
+        };
     };
     // console.log(msg);
 };
