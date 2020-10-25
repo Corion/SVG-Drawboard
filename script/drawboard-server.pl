@@ -39,10 +39,11 @@ sub fetch_board( $name ) {
 
 get '/board/:name' => sub($c) {
     my $boardname = $c->param('name');
-    $sessions->load($c);
-    my $id = $sessions->{uid} || generate_session_id();
-    $sessions->{uid} = $id;
-    $sessions->store($c);
+    #$sessions->load($c);
+    #my $id = $sessions->{uid} || generate_session_id();
+    #warn "Storing id as uid $id";
+    #$sessions->{uid} = $id;
+    #$sessions->store($c);
 
     $c->reply->static('./canvas.html');
 };
