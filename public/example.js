@@ -22,17 +22,24 @@ function addSelectionOverlay(svg,singleItem) {
         let containedId = oldOverlay.data("overlaid");
         let contained = SVG.get(containedId);
 
-        let cx = oldOverlay.cx();
-        let cy = oldOverlay.cy();
-        oldOverlay.replace(contained);
+        if( contained ) {
+            let cx = oldOverlay.cx();
+            let cy = oldOverlay.cy();
+            oldOverlay.replace(contained);
 
-        // Move the contained object into the correct position
-        contained.center(cx,cy);
+            // Move the contained object into the correct position
+            contained.center(cx,cy);
 
-        contained.removeClass('overlaid');
+            contained.removeClass('overlaid');
+        } else {
+            console.log("Item with id '" + containedId + "' went away ?!");
+        };
     };
 
     let item = SVG.get(singleItem);
+    if( ! item ) {
+        console.log("No item found for id '"+singleItem+"' (?!)");
+    };
     let mainItem = SVG.select('.main',item.node).first();
     let bb = mainItem.bbox();
     let overlay = svg.group().attr({"id":"overlay"});
