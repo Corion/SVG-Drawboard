@@ -150,7 +150,6 @@ function addSelectionOverlay(svg,singleItem) {
             to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
         };
 
-        // Reconstruct width/height, then set it
         // Find which handle we moved, and adjust the two neighbouring
         // handles accordingly...
         if( event.target === nw.node ) {
@@ -265,14 +264,9 @@ function makeNote(svg, attrs) {
     return g
 }
 
-// Ideally, recreate the note, instead of patching
-// see morphdom, maybe
 function updateNote(svg, note, attrs) {
     console.log("Switched out of text editing", event.target);
     console.log("Updating note with", attrs);
-    // Actually, we should regenerate our complete node here
-    // for consistency, instead of merely updating the text:
-
     let newNote = makeNote( svg, attrs );
     return newNote;
 };
