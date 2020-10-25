@@ -496,6 +496,9 @@ function exportAsSvg() {
 /*
  * Next steps:
  *     Implement moving of the viewbox (SVG.ViewBox) and zooming
+ *     Implement defined zones where you can one-click to move/zoom to
+ *     Implement client cursors
+ *     Implement note color
  *     Implement download of the SVG, and download of a JSON describing the SVG
  *     Implement upload of random SVGs (?)
  *     Create item from template
