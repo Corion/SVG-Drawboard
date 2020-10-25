@@ -498,7 +498,15 @@ function exportAsSvg() {
  *     Implement moving of the viewbox (SVG.ViewBox) and zooming
  *     Implement defined zones where you can one-click to move/zoom to
  *     Implement client cursors
- *     Implement note color
+ *     Implement (inline) images
+ *     Implement command line client for creating notes
+ *     Implement command line client for uploading images
+ *     Implement (server-side) images
+ *     Implement note color (using <input type="color> preferrably)
+ *     Implement touch support for handles
+ *     Implement touch support for moving (separate move handle)
+ *     Implement support for rotation
+ *     Implement touch support for rotating (separate rotation handle)
  *     Implement download of the SVG, and download of a JSON describing the SVG
  *     Implement upload of random SVGs (?)
  *     Create item from template
