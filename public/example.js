@@ -102,17 +102,22 @@ function addSelectionOverlay(svg,singleItem) {
     // Also, log any moving, for later communication
     let dragmove_side = (event) => {
         let item = SVG.get(singleItem);
-        let mainItem = SVG.select('.main',item.node).first();
-        let bb = mainItem.bbox();
+        let noteInfo = getNoteInfo(item);
+
+        // Reconstruct width/height, then set it
+        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
+        noteInfo.width = newbb.w;
+        noteInfo.height = newbb.h;
+        noteInfo.x = w.cx();
+        noteInfo.y = n.cy();
+        let newNote = makeNote(svg,noteInfo);
+
         let info = {
             from : { x: null, y: null },
             to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
         };
 
-        // Reconstruct width/height, then set it
-        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
-        mainItem.size(newbb.w, newbb.h);
-        item.move(w.cx(),n.cy());
+        item = newNote;
 
         // Adjust the four corner handles
         nw.center(item.x(),        item.y());
@@ -131,8 +136,8 @@ function addSelectionOverlay(svg,singleItem) {
 
     let dragmove_corner = (event) => {
         let item = SVG.get(singleItem);
-        let mainItem = SVG.select('.main',item.node).first();
-        let bb = mainItem.bbox();
+        let noteInfo = getNoteInfo(item);
+
         let info = {
             from : { x: null, y: null },
             to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
@@ -159,8 +164,14 @@ function addSelectionOverlay(svg,singleItem) {
         };
 
         let newbb = {'w':ne.cx()-nw.cx(),'h':sw.cy()-ne.cy()};
-        mainItem.size(newbb.w, newbb.h);
-        item.move(nw.cx(),nw.cy());
+        noteInfo.width = newbb.w;
+        noteInfo.height = newbb.h;
+        noteInfo.x = nw.cx();
+        noteInfo.y = nw.cy();
+
+        let newNote = makeNote(svg,noteInfo);
+        item = newNote;
+
         console.log(event);
 
         // Adjust the four side handles
@@ -225,6 +236,16 @@ function makeNote(svg, attrs) {
         console.log("Selected single group");
         let overlay = addSelectionOverlay(svg, g.attr('id'));
     });
+
+    if( attrs.id ) {
+        let oldNode = SVG.get(attrs.id);
+        if( oldNode ) {
+            console.log("Replacing old item " + attrs.id);
+            oldNode.replace( g );
+        };
+        g.attr('id', attrs.id);
+    };
+
     return g
 }
 
@@ -237,9 +258,7 @@ function updateNote(svg, note, foreign, attrs) {
     // for consistency, instead of merely updating the text:
 
     let newNote = makeNote( svg, attrs );
-    note.replace( newNote );
-    note.attr('id', attrs.id);
-    return note;
+    return newNote;
 };
 
 let state_editedNode;
@@ -282,13 +301,9 @@ function startTextEditing( event ) {
             if( state_editedNode ) {
                 if( ! state_editedNode.node.contains( event.target )) {
                     let bb = SVG.select('.main', note.node).first().bbox();
-                    updateNote(svg, note, myforeign, {
-                        text: textdiv.textContent,
-                        x : note.x(),
-                        y : note.y(),
-                        width: bb.width,
-                        height: bb.height
-                    });
+                    let info = getNoteInfo(note);
+                    info.text = textdiv.textContent;
+                    updateNote(svg, note, myforeign, info);
                     state_editedNode = undefined;
                     svg.off("click");
                 };
@@ -306,8 +321,6 @@ function startTextEditing( event ) {
 function mkNote(svg,nodeInfo) {
     let id = nodeInfo.id;
     let g = makeNote(svg, nodeInfo);
-
-    g.attr('id', nodeInfo.id);
 
     nodes.push(g);
     return g;
