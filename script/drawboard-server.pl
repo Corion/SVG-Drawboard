@@ -61,7 +61,7 @@ sub notify_listeners($roomname, $id, $message) {
 
     # First, store the message locally, for later replay
     # and consolidation of the document
-    $dbh->do(<<~SQL, {}, $roomname, $message->{action}, $message->{info}->{id}, $str);
+    $dbh->do(<<~SQL, {}, $roomname, $message->{info}->{id}, $message->{action}, $str);
         insert into drawboard_items
                (drawboard,item,action,properties)
         values (?,?,?,?)
@@ -128,6 +128,19 @@ websocket '/uplink' => sub($c) {
 
             # Bring the client up to speed:
             warn "Fetching Items in '$boardname'";
+            my $sth = $dbh->prepare(<<~SQL);
+                    select drawboard
+                         , item
+                         , properties
+                         , timestamp
+                         , action
+                         , rank() over (partition by drawboard, item order by timestamp desc) as pos
+                      from drawboard_items
+                     where drawboard = ?
+            SQL
+            $sth->execute($boardname);
+            warn DBIx::RunSQL->format_results(sth => $sth);
+
             my $items = $dbh->selectall_arrayref(<<~SQL, { Slice => {}}, $boardname);
                 with drawboard_state as (
                     select drawboard
