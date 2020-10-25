@@ -3,7 +3,6 @@
 var svg = SVG('svg1').size("100%", 900);
 var links = svg.group();
 var markers = svg.group();
-let nodes = [];
 var defs = svg.defs();
 
 let loc = window.location;
@@ -434,8 +433,6 @@ function startTextEditing( event ) {
 function mkNote(svg,nodeInfo) {
     let id = nodeInfo.id;
     let g = makeNote(svg, nodeInfo);
-
-    nodes.push(g);
     return g;
 }
 
