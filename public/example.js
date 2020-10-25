@@ -301,9 +301,9 @@ function startTextEditing( event ) {
             console.log("Click on", event);
 
             if( state_editedNode ) {
-                console.log("Left editing note",state_editedNode);
                 let editedNode = SVG.get(state_editedNode);
                 if( ! editedNode.node.contains( event.target )) {
+                    console.log("Left editing note",state_editedNode);
                     let bb = SVG.select('.main', editedNode.node).first().bbox();
                     let info = getNoteInfo(editedNode);
                     info.text = textdiv.textContent;
