@@ -88,18 +88,23 @@ document.onkeydown = function (e) {
 
 function deleteItems(svg,items,local) {
     let oldOverlay = SVG.get("overlay");
-    let containedId = oldOverlay.data("overlaid");
+    let containedId;
+    if( oldOverlay ) {
+        containedId = oldOverlay.data("overlaid");
+    };
 
     for( let id of items ) {
         let item = SVG.get(id);
-        if( local ) {
-            let info = getNoteInfo(item); // for undo
-            broadcastNoteState(info,'delete');
-        };
-        item.remove();
+        if( item ) {
+            if( local ) {
+                let info = getNoteInfo(item); // for undo
+                broadcastNoteState(info,'delete');
+            };
+            item.remove();
 
-        if( containedId === id ) {
-            oldOverlay.remove();
+            if( containedId === id ) {
+                oldOverlay.remove();
+            };
         };
     };
 }
@@ -357,9 +362,13 @@ function makeNote(svg, attrs) {
 
     if( attrs.id ) {
         let oldNode = SVG.get(attrs.id);
-        if( oldNode ) {
-            console.log("Replacing old item " + attrs.id);
-            oldNode.replace( g );
+        if( oldNode && oldNode.parent() ) {
+            if( oldNode === g ) {
+                console.log("Old and new node are identical?!");
+            } else {
+                console.log("Replacing old item", oldNode, g);
+                oldNode.replace( g );
+            };
         };
         g.attr('id', attrs.id);
     };
@@ -478,7 +487,6 @@ function exportAsSvg() {
 // Move X from a to b by (dX, dY)
 // Change attribute Y (other than position) on X
 // Change node type (=Template)
-// Delete X
 // How will we handle connectors/arrows?
 // How will we handle templates? Handlebars?
 // Communication: socket.io or just hand-rolled? Currently hand-rolled
@@ -487,9 +495,11 @@ function exportAsSvg() {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
+ *     Implement moving of the viewbox (SVG.ViewBox) and zooming
+ *     Implement download of the SVG, and download of a JSON describing the SVG
+ *     Implement upload of random SVGs (?)
  *     Create item from template
- *     Handle item deletion
- *     Broadcast item deletion
+ *     Eliminate old default data
  */
 
 // Bugs
