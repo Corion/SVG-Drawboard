@@ -186,48 +186,67 @@ function addSelectionOverlay(svg,singleItem) {
     return overlay
 }
 
-function mkNote(svg,nodeInfo) {
-    let id = nodeInfo.id;
 
-    // Fill the template
-    // We need to do that in code as we have lots of interdependencies here
-
-    //let myTemplate = Handlebars.compile(template['note']);
-    //let str = myTemplate(nodeInfo);
-    // let newNode = svg.svg(str);
-
+// Creates a note, but does not use the id attribute
+function makeNote(svg, attrs) {
     let t = svg.text((t) => {
-        t.tspan(nodeInfo.text).attr({"fill":"black","font-weight":"bold"});
+        t.tspan(attrs.text).attr({"fill":"black","font-weight":"bold"});
     });
-    let b = svg.rect().attr({"fill":"#ffe840"}).size(nodeInfo.width,nodeInfo.height);
+    t.addClass('text');
+    let b = svg.rect().attr({"fill":"#ffe840"}).size(attrs.width,attrs.height);
     b.addClass('main');
     let bb = b.bbox();
 
-    var g = svg.group().attr({"id":nodeInfo.id});
+    var g = svg.group();
     g.add(b);
     g.add(t);
 
     // Text is allowed to bleed out of the "paper"
     t.center(bb.cx,bb.cy);
+    g.move(attrs.x, attrs.y);
 
-    g.move(nodeInfo.x, nodeInfo.y);
-
-    // We also need to handle touchstart, see draggy.js source
-    // In the middle/long run, we need to ditch draggy completely, so we
-    // can add our overlay _and_ drag with a single click
-    // Also, editing the text also is broken here, so maybe we need an
-    // alltogether different approach
+    t.on('click', startTextEditing);
     g.on('mousedown', (event) => {
         console.log("Selected single group");
-        let overlay = addSelectionOverlay(svg, nodeInfo.id);
+        let overlay = addSelectionOverlay(svg, g.attr('id'));
     });
+    return g
+}
 
-    t.on('click', (event) => {
+// Ideally, recreate the note, instead of patching
+// see morphdom, maybe
+function updateNote(svg, note, foreign, attrs) {
+    console.log("Switched out of text editing", event.target);
+    console.log("Updating note with", attrs);
+    // Actually, we should regenerate our complete node here
+    // for consistency, instead of merely updating the text:
+    let text = attrs.text;
+    let newText = svg.text((t) => {
+        t.tspan(text).attr({"fill":"black","font-weight":"bold"});
+    });
+    let oldText = SVG.select('.text', note.node).first();
+
+    oldText.remove(); // XXX recreate the complete note instead
+    let bb = SVG.select('.main', note.node).first().bbox();
+    newText.addClass('text');
+    //let bb = SVG.select('.main', note.node).bbox();
+    note.add(newText);
+    newText.center(bb.cx,bb.cy);
+    foreign.remove();
+
+    // rebind the text editing
+    newText.on('click', startTextEditing);
+};
+
+let state_editedNode;
+function startTextEditing( event ) {
         // move a HTML contenteditable div in place, let the user edit it
         // If there is a click outside, update the text from the div
         console.log("Editing");
         // Overlay the "paper" we write on
-        let bb = b.bbox();
+        let t = event.target.instance;
+        let note = t.parent(SVG.G);
+        let bb = SVG.select('.main', note.node).first().bbox();
 
         //let myforeign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject')
         let myforeign = svg.element('foreignObject');
@@ -235,17 +254,11 @@ function mkNote(svg,nodeInfo) {
             "width" : bb.width + "px",
             "height" : bb.height + "px",
         });
-        //myforeign.addClass("foreign");
 
         let textdiv = document.createElement("div");
         let textspan = document.createElement("div");
         let textnode = document.createTextNode(t.text());
         textdiv.setAttribute("contentEditable", "true");
-        //textdiv.setAttribute("min-width", bb.width + 'px');
-        //textdiv.setAttribute("min-height", bb.height + 'px');
-        //textspan.style.width = '100px';
-        //textspan.style.height = '100px';
-        // textspan.setAttribute("height", '100%');
         textdiv.classList.add("insideforeign"); //to make div fit text
         textdiv.appendChild(textspan);
         textspan.appendChild(textnode);
@@ -260,39 +273,36 @@ function mkNote(svg,nodeInfo) {
         svg.on("click", (event) => {
             // find x,y coordinate, and check if the location is contained
             // in myforeign
+            console.log("Click on", event);
+
+            if( state_editedNode ) {
+                if( ! state_editedNode.node.contains( event.target )) {
+                    let bb = SVG.select('.main', note.node).first().bbox();
+                    updateNote(svg, note, myforeign, {
+                        text: textdiv.textContent,
+                        x : bb.x,
+                        y : bb. y
+                    });
+                    state_editedNode = undefined;
+                    svg.off("click");
+                };
+            };
         });
 
         // XXX We would like to center on the tspan, or whatever?!
         let transform = new SVG.Matrix(t);
-        g.add(myforeign);
+        note.add(myforeign);
         myforeign.transform(transform);
         myforeign.node.appendChild(textdiv);
-    });
+        state_editedNode = note;
+};
 
-    /*
-    g.on('dragmove', function(event) {
-        // Broadcast new position, every 0.5 seconds
-        var info = {
-            from : { x: null, y: null },
-            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
-        };
-        //console.log("Moving: "+name+" at ",info,event.detail);
-    });
-    g.on('dragend', (event) => {
-        // Save the new coordinates in the backend
-        var info = {
-            from : { x: null, y: null },
-            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
-        };
-        console.log("Moved: "+name+" to ",info,event.detail);
+function mkNote(svg,nodeInfo) {
+    let id = nodeInfo.id;
+    let g = makeNote(svg, nodeInfo);
 
-        // Broadcast new position of item
+    g.attr('id', nodeInfo.id);
 
-        // Also update borders around table groups via group.bbox()
-        // sizeSection( tableInfo.section );
-
-    });
-    */
     nodes.push(g);
     return g;
 }
