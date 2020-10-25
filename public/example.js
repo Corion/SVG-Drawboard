@@ -353,6 +353,17 @@ function mkNodes(nodes) {
     }
 }
 
+function createNote() {
+    let e = event || window.event;
+    mkNote(svg, {
+        text: "Your text",
+        x: e.clientX,
+        y: e.clientY - 200,
+        width: 100,
+        height: 100,
+
+    });
+}
 
 function exportAsSvg() {
     var svg_blob = new Blob([svg.svg()],
@@ -380,7 +391,6 @@ function exportAsSvg() {
 // First implementation: Just render a set of data
 /*
  * Next steps:
- *     Create item at x,y, { props } via button
  *     Submit item creation at x,y, { props } via socket
  *     Create item at x,y, { props } via socket
  *     Create item from template
