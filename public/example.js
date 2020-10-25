@@ -219,7 +219,7 @@ function getNoteInfo( note ) {
     };
 }
 
-// Creates a note, but does not use the id attribute
+// Creates or replaces a note
 function makeNote(svg, attrs) {
     let t = svg.text((t) => {
         t.tspan(attrs.text).attr({"fill":"black","font-weight":"bold"});
