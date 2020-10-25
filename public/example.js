@@ -390,3 +390,11 @@ function exportAsSvg() {
  *     Create item from template
  *     Broadcast socket to other clients
  */
+
+// Bugs
+/*
+ *     * [ ] We can't handle multiline text when editing
+ *           Fixing this likely requires parsing .text() for newlines,
+ *           converting between these and <tspan> objects
+ *
+ */
