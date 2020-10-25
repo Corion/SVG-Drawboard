@@ -34,7 +34,6 @@ function addSelectionOverlay(svg,singleItem) {
 
     let item = SVG.get(singleItem);
     let mainItem = SVG.select('.main',item.node).first();
-
     let bb = mainItem.bbox();
     let overlay = svg.group().attr({"id":"overlay"});
         //.draggy();
@@ -102,13 +101,15 @@ function addSelectionOverlay(svg,singleItem) {
 
     // Also, log any moving, for later communication
     let dragmove_side = (event) => {
+        let item = SVG.get(singleItem);
+        let mainItem = SVG.select('.main',item.node).first();
+        let bb = mainItem.bbox();
         let info = {
             from : { x: null, y: null },
             to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
         };
 
         // Reconstruct width/height, then set it
-        let bb = mainItem.bbox();
         let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
         mainItem.size(newbb.w, newbb.h);
         item.move(w.cx(),n.cy());
@@ -129,13 +130,15 @@ function addSelectionOverlay(svg,singleItem) {
     };
 
     let dragmove_corner = (event) => {
+        let item = SVG.get(singleItem);
+        let mainItem = SVG.select('.main',item.node).first();
+        let bb = mainItem.bbox();
         let info = {
             from : { x: null, y: null },
             to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
         };
 
         // Reconstruct width/height, then set it
-        let bb = mainItem.bbox();
         // Find which handle we moved, and adjust the two neighbouring
         // handles accordingly...
         if( event.target === nw.node ) {
