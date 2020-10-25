@@ -220,22 +220,11 @@ function updateNote(svg, note, foreign, attrs) {
     console.log("Updating note with", attrs);
     // Actually, we should regenerate our complete node here
     // for consistency, instead of merely updating the text:
-    let text = attrs.text;
-    let newText = svg.text((t) => {
-        t.tspan(text).attr({"fill":"black","font-weight":"bold"});
-    });
-    let oldText = SVG.select('.text', note.node).first();
 
-    oldText.remove(); // XXX recreate the complete note instead
-    let bb = SVG.select('.main', note.node).first().bbox();
-    newText.addClass('text');
-    //let bb = SVG.select('.main', note.node).bbox();
-    note.add(newText);
-    newText.center(bb.cx,bb.cy);
-    foreign.remove();
-
-    // rebind the text editing
-    newText.on('click', startTextEditing);
+    let newNote = makeNote( svg, attrs );
+    note.replace( newNote );
+    note.attr('id', attrs.id);
+    return note;
 };
 
 let state_editedNode;
@@ -280,8 +269,10 @@ function startTextEditing( event ) {
                     let bb = SVG.select('.main', note.node).first().bbox();
                     updateNote(svg, note, myforeign, {
                         text: textdiv.textContent,
-                        x : bb.x,
-                        y : bb. y
+                        x : note.x(),
+                        y : note.y(),
+                        width: bb.width,
+                        height: bb.height
                     });
                     state_editedNode = undefined;
                     svg.off("click");
