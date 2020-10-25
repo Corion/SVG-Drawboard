@@ -189,6 +189,18 @@ function addSelectionOverlay(svg,singleItem) {
     return overlay
 }
 
+function getNoteInfo( note ) {
+    let t = SVG.select('.text', note.node).first();
+    let bb = SVG.select('.main', note.node).first().bbox();
+    return {
+        id     : note.attr('id'),
+        text   : t.text(),
+        x      : note.x(),
+        y      : note.y(),
+        width  : bb.width,
+        height : bb.height
+    };
+}
 
 // Creates a note, but does not use the id attribute
 function makeNote(svg, attrs) {
