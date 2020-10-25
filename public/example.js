@@ -226,7 +226,55 @@ function mkNote(svg,nodeInfo) {
     // Also, editing the text also is broken here, so maybe we need an
     // alltogether different approach
     g.on('mousedown', (event) => {
+        console.log("Selected single group");
         let overlay = addSelectionOverlay(svg, nodeInfo.id);
+    });
+
+    t.on('click', (event) => {
+        // move a HTML contenteditable div in place, let the user edit it
+        // If there is a click outside, update the text from the div
+        console.log("Editing");
+        // Overlay the "paper" we write on
+        let bb = b.bbox();
+
+        //let myforeign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject')
+        let myforeign = svg.element('foreignObject');
+        myforeign.attr({
+            "width" : bb.width + "px",
+            "height" : bb.height + "px",
+        });
+        //myforeign.addClass("foreign");
+
+        let textdiv = document.createElement("div");
+        let textspan = document.createElement("div");
+        let textnode = document.createTextNode(t.text());
+        textdiv.setAttribute("contentEditable", "true");
+        //textdiv.setAttribute("min-width", bb.width + 'px');
+        //textdiv.setAttribute("min-height", bb.height + 'px');
+        //textspan.style.width = '100px';
+        //textspan.style.height = '100px';
+        // textspan.setAttribute("height", '100%');
+        textdiv.classList.add("insideforeign"); //to make div fit text
+        textdiv.appendChild(textspan);
+        textspan.appendChild(textnode);
+
+        //myforeign.setAttribute("height", "100%");
+        // textdiv.addEventListener("mousedown", (ev) => {}, false);
+        //let localpoint = getlocalmousecoord(svg,event);
+
+        // Install a listener on svg, which checks if we clicked away from our
+        // newly added element, and if so, deletes the element
+        svg.off("click"); // Do we really want to wipe all existing listeners?!
+        svg.on("click", (event) => {
+            // find x,y coordinate, and check if the location is contained
+            // in myforeign
+        });
+
+        // XXX We would like to center on the tspan, or whatever?!
+        let transform = new SVG.Matrix(t);
+        g.add(myforeign);
+        myforeign.transform(transform);
+        myforeign.node.appendChild(textdiv);
     });
 
     /*
