@@ -244,6 +244,15 @@ function makeNote(svg, attrs) {
         let overlay = addSelectionOverlay(svg, g.attr('id'));
     });
 
+    g.draggy().on("dragend", (event) => {
+        console.log("End",event);
+        addSelectionOverlay(svg, event.target.instance.attr('id'));
+    });
+    g.draggy().on("dragmove", (event) => {
+        console.log("Move",event);
+        addSelectionOverlay(svg, event.target.instance.attr('id'));
+    });
+
     if( attrs.id ) {
         let oldNode = SVG.get(attrs.id);
         if( oldNode ) {
@@ -276,6 +285,7 @@ function startTextEditing( event ) {
         // Overlay the "paper" we write on
         let t = event.target.instance;
         let note = t.parent(SVG.G);
+        note.fixed();
         let bb = SVG.select('.main', note.node).first().bbox();
 
         let myforeign = svg.element('foreignObject');
