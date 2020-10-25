@@ -301,9 +301,11 @@ function startTextEditing( event ) {
             console.log("Click on", event);
 
             if( state_editedNode ) {
-                if( ! state_editedNode.node.contains( event.target )) {
-                    let bb = SVG.select('.main', note.node).first().bbox();
-                    let info = getNoteInfo(note);
+                console.log("Left editing note",state_editedNode);
+                let editedNode = SVG.get(state_editedNode);
+                if( ! editedNode.node.contains( event.target )) {
+                    let bb = SVG.select('.main', editedNode.node).first().bbox();
+                    let info = getNoteInfo(editedNode);
                     info.text = textdiv.textContent;
                     updateNote(svg, editedNode, info);
                     state_editedNode = undefined;
@@ -317,7 +319,7 @@ function startTextEditing( event ) {
         note.add(myforeign);
         myforeign.transform(transform);
         myforeign.node.appendChild(textdiv);
-        state_editedNode = note;
+        state_editedNode = note.attr('id');
 };
 
 function mkNote(svg,nodeInfo) {
