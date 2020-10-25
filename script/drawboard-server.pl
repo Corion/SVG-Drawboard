@@ -13,9 +13,11 @@ $sessions->default_expiration(86400);
 our %rooms;
 our %connections;
 
-our $id;
+our $id = 1;
 sub generate_session_id {
-    $id++
+    $id++;
+    warn "Generating new id: $id";
+    $id
 }
 
 push @{ app->static->paths }, Mojo::File->curfile->dirname->dirname->child('public');
