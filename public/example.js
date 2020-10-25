@@ -499,7 +499,6 @@ function exportAsSvg() {
  *     Implement download of the SVG, and download of a JSON describing the SVG
  *     Implement upload of random SVGs (?)
  *     Create item from template
- *     Eliminate old default data
  */
 
 // Bugs
