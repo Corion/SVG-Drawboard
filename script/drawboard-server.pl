@@ -28,6 +28,7 @@ sub generate_session_id {
 }
 
 push @{ app->static->paths }, Mojo::File->curfile->dirname->dirname->child('public');
+push @{ app->renderer->paths }, Mojo::File->curfile->dirname->dirname->child('templates');
 
 sub fetch_board( $name ) {
 
@@ -43,6 +44,16 @@ sub fetch_board( $name ) {
 
     return $board
 }
+
+get '/' => sub( $c ) {
+    return $c->redirect_to('index.html');
+};
+
+get '/index' => sub($c) {
+    warn "Current boards are " . join ",", map { $rooms{$_} } sort keys %rooms;
+    $c->stash(boards => [ map { $rooms{$_} } sort keys %rooms ]);
+    $c->render(template => 'index');
+};
 
 get '/board/:name' => sub($c) {
     my $boardname = $c->param('name');
@@ -128,18 +139,18 @@ websocket '/uplink' => sub($c) {
 
             # Bring the client up to speed:
             warn "Fetching Items in '$boardname'";
-            my $sth = $dbh->prepare(<<~SQL);
-                    select drawboard
-                         , item
-                         , properties
-                         , timestamp
-                         , action
-                         , rank() over (partition by drawboard, item order by timestamp desc) as pos
-                      from drawboard_items
-                     where drawboard = ?
-            SQL
-            $sth->execute($boardname);
-            warn DBIx::RunSQL->format_results(sth => $sth);
+            #my $sth = $dbh->prepare(<<~SQL);
+            #        select drawboard
+            #             , item
+            #             , properties
+            #             , timestamp
+            #             , action
+            #             , rank() over (partition by drawboard, item order by timestamp desc) as pos
+            #          from drawboard_items
+            #         where drawboard = ?
+            #SQL
+            #$sth->execute($boardname);
+            #warn DBIx::RunSQL->format_results(sth => $sth);
 
             my $items = $dbh->selectall_arrayref(<<~SQL, { Slice => {}}, $boardname);
                 with drawboard_state as (

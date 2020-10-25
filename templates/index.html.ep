@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html>
+  <head><title>Drawboard</title></head>
+  <body>
+  <h1>Current boards</h1>
+  <ul>
+%for my $room (@$boards) {
+    <li><a href="./board/<%=$room->{name}%>"><%=$room->{name}%></a></li>
+%}
+  </ul>
+  </body>
+</html>
