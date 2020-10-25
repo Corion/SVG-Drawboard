@@ -278,7 +278,6 @@ function startTextEditing( event ) {
         let note = t.parent(SVG.G);
         let bb = SVG.select('.main', note.node).first().bbox();
 
-        //let myforeign = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject')
         let myforeign = svg.element('foreignObject');
         myforeign.attr({
             "width" : bb.width + "px",
@@ -292,10 +291,6 @@ function startTextEditing( event ) {
         textdiv.classList.add("insideforeign"); //to make div fit text
         textdiv.appendChild(textspan);
         textspan.appendChild(textnode);
-
-        //myforeign.setAttribute("height", "100%");
-        // textdiv.addEventListener("mousedown", (ev) => {}, false);
-        //let localpoint = getlocalmousecoord(svg,event);
 
         // Install a listener on svg, which checks if we clicked away from our
         // newly added element, and if so, deletes the element
