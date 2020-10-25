@@ -31,20 +31,23 @@ uplink.onmessage = (event) => {
     console.log(event.data);
     let msg = JSON.parse(event.data);
     console.log(msg);
-    if(    msg.boardname == boardname
-        && /^(dragend|textedit)$/.test(msg.action)) {
-        // Last edit wins
-        // We need to handle the user selection
-        let oldOverlay = SVG.get("overlay");
-        let moveOverlay = false;
-        if( oldOverlay ) {
-            let containedId = oldOverlay.data("overlaid");
-            moveOverlay = containedId === msg.info.id;
-        };
+    if( msg.boardname == boardname ) {
+        if( /^(dragend|textedit)$/.test(msg.action)) {
+            // Last edit wins
+            // We need to handle the user selection
+            let oldOverlay = SVG.get("overlay");
+            let moveOverlay = false;
+            if( oldOverlay ) {
+                let containedId = oldOverlay.data("overlaid");
+                moveOverlay = containedId === msg.info.id;
+            };
 
-        makeNote(svg,msg.info);
-        if( moveOverlay ) {
-            addSelectionOverlay(svg, msg.info.id);
+            makeNote(svg,msg.info);
+            if( moveOverlay ) {
+                addSelectionOverlay(svg, msg.info.id);
+            };
+        } else if( "delete" === msg.action ) {
+            deleteItems(svg, [msg.info.id], false);
         };
     };
     // console.log(msg);
@@ -67,6 +70,50 @@ var template = {
 };
 */
 
+// Hotkeys
+
+document.onkeydown = function (e) {
+    e = e || window.event;
+    // use e.keyCode
+    console.log(e.keyCode);
+
+    switch(e.keyCode) {
+        case 46: // del
+                 deleteCurrentSelection();
+                 break;
+
+    };
+
+    //console.log(e.keyCode);
+};
+
+function deleteItems(svg,items,local) {
+    let oldOverlay = SVG.get("overlay");
+    let containedId = oldOverlay.data("overlaid");
+
+    for( let id of items ) {
+        let item = SVG.get(id);
+        if( local ) {
+            let info = getNoteInfo(item); // for undo
+            broadcastNoteState(info,'delete');
+        };
+        item.remove();
+
+        if( containedId === id ) {
+            oldOverlay.remove();
+        };
+    };
+}
+
+function deleteCurrentSelection(svg) {
+    let oldOverlay = SVG.get("overlay");
+    if( oldOverlay ) {
+        let containedId = oldOverlay.data("overlaid");
+        deleteItems(svg, [ containedId ], true);
+        oldOverlay.remove();
+    };
+}
+
 function addSelectionOverlay(svg,singleItem) {
 
     // remove old overlay, if any:
@@ -86,6 +133,7 @@ function addSelectionOverlay(svg,singleItem) {
             contained.removeClass('overlaid');
         } else {
             console.log("Item with id '" + containedId + "' went away ?!");
+            oldOverlay.remove();
         };
     };
 

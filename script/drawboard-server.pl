@@ -61,10 +61,10 @@ sub notify_listeners($roomname, $id, $message) {
 
     # First, store the message locally, for later replay
     # and consolidation of the document
-    $dbh->do(<<~SQL, {}, $roomname, $message->{info}->{id}, $str);
+    $dbh->do(<<~SQL, {}, $roomname, $message->{action}, $message->{info}->{id}, $str);
         insert into drawboard_items
-               (drawboard,item,properties)
-        values (?,?,?)
+               (drawboard,item,action,properties)
+        values (?,?,?,?)
     SQL
 
     # Then, broadcast it to the room:
@@ -134,6 +134,7 @@ websocket '/uplink' => sub($c) {
                          , item
                          , properties
                          , timestamp
+                         , action
                          , rank() over (partition by drawboard, item order by timestamp desc) as pos
                       from drawboard_items
                      where drawboard = ?
@@ -141,6 +142,7 @@ websocket '/uplink' => sub($c) {
                 select *
                   from drawboard_state
                   where pos = 1
+                    and action not in ('delete')
                  order by timestamp
             SQL
 
