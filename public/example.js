@@ -6,6 +6,38 @@ var markers = svg.group();
 let nodes = [];
 var defs = svg.defs();
 
+let uplink = new WebSocket("ws://localhost:3000/uplink");
+let boardname = window.location.href.substr(window.location.href.lastIndexOf("/")+1);
+
+uplink.onopen = (event) => {
+    uplink.send(JSON.stringify({
+        'action': 'subscribe',
+        'boardname': boardname,
+    }));
+    console.log("Connected, subscribing");
+};
+
+uplink.onmessage = (event) => {
+    let msg = JSON.parse(event.data);
+    console.log(msg);
+    if(    msg.boardname == boardname
+        && /^(dragend|textedit)$/.test(msg.action)) {
+        // Last edit wins
+        // We need to handle the user selection
+        makeNote(svg,msg.info);
+    };
+    // console.log(msg);
+};
+
+function broadcastNoteState(noteInfo,eventname) {
+    uplink.send(JSON.stringify({
+        info: noteInfo,
+        user: "???",
+        action: eventname,
+        "boardname": boardname,
+    }));
+}
+
 /*
 // Later, precompile the templates, maybe in an external file even
 var template = {
@@ -210,6 +242,7 @@ function getNoteInfo( note ) {
     let t = SVG.select('.text', note.node).first();
     let bb = SVG.select('.main', note.node).first().bbox();
     return {
+        type   : 'note',
         id     : note.attr('id'),
         text   : t.text(),
         x      : note.x(),
@@ -246,6 +279,8 @@ function makeNote(svg, attrs) {
     g.draggy().on("dragend", (event) => {
         console.log("End",event);
         addSelectionOverlay(svg, event.target.instance.attr('id'));
+        let nodeInfo = getNoteInfo(event.target.instance);
+        broadcastNoteState(nodeInfo,'dragend');
     });
     g.draggy().on("dragmove", (event) => {
         console.log("Move",event);
@@ -268,6 +303,7 @@ function updateNote(svg, note, attrs) {
     console.log("Switched out of text editing", event.target);
     console.log("Updating note with", attrs);
     let newNote = makeNote( svg, attrs );
+    broadcastNoteState(getNoteInfo(newNote),'textedit');
     return newNote;
 };
 
@@ -382,6 +418,7 @@ function exportAsSvg() {
 // Communication: socket.io or just hand-rolled?
 //     https://socket.io/docs/client-api/
 //     https://github.com/socketio/socket.io-protocol
+// How will we handle the selection of multiple elements?!
 /*
  * Next steps:
  *     Submit item creation at x,y, { props } via socket
