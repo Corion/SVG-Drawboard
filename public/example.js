@@ -435,16 +435,16 @@ function exportAsSvg() {
 // Delete X
 // How will we handle connectors/arrows?
 // How will we handle templates? Handlebars?
-// Communication: socket.io or just hand-rolled?
+// Communication: socket.io or just hand-rolled? Currently hand-rolled
 //     https://socket.io/docs/client-api/
 //     https://github.com/socketio/socket.io-protocol
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
- *     Submit item creation at x,y, { props } via socket
- *     Create item at x,y, { props } via socket
  *     Create item from template
- *     Broadcast socket to other clients
+ *     Store items server-side so a fresh client can be sent the items
+ *     Handle item deletion
+ *     Broadcast item deletion
  */
 
 // Bugs
@@ -452,5 +452,6 @@ function exportAsSvg() {
  *     * [ ] We can't handle multiline text when editing
  *           Fixing this likely requires parsing .text() for newlines,
  *           converting between these and <tspan> objects
+ *     * [ ] We don't handle the z-order of items at all
  *
  */
