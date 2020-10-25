@@ -382,7 +382,6 @@ function exportAsSvg() {
 // Communication: socket.io or just hand-rolled?
 //     https://socket.io/docs/client-api/
 //     https://github.com/socketio/socket.io-protocol
-// First implementation: Just render a set of data
 /*
  * Next steps:
  *     Submit item creation at x,y, { props } via socket
