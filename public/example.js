@@ -38,14 +38,9 @@ function addSelectionOverlay(svg,singleItem) {
     let bb = mainItem.bbox();
     let overlay = svg.group().attr({"id":"overlay"});
         //.draggy();
-    let r = svg.rect();
-    r.attr({"stroke":"black", "stroke-width":3, "fill-opacity":0});
-    r.size(bb.w+2,bb.h+2);
-    r.center(item.cx(),item.cy());
     item.addClass('overlaid');
 
     overlay.add(item);
-    overlay.add(r);
     overlay.data("overlaid",item,true); // We want to store an object reference
 
     // Add eight svg.circle() as handles for sizing the selection
@@ -105,6 +100,7 @@ function addSelectionOverlay(svg,singleItem) {
     });
     overlay.add(sw);
 
+    // Also, log any moving, for later communication
     let dragmove_side = (event) => {
         let info = {
             from : { x: null, y: null },
@@ -175,21 +171,17 @@ function addSelectionOverlay(svg,singleItem) {
     e.on("dragmove", dragmove_side );
     s.on("dragmove", dragmove_side );
     w.on("dragmove", dragmove_side );
-    e.on("dragend", (event) => {
-        let bb = mainItem.bbox();
-        console.log("End dimensions",bb);
-    });
 
     nw.on("dragmove",dragmove_corner);
     sw.on("dragmove",dragmove_corner);
     ne.on("dragmove",dragmove_corner);
     se.on("dragmove",dragmove_corner);
 
-    // draggy.constrain() the n,e,s,w circles to move only on their axis
-    // line up the corners when dragging the edges, line up the edges when
-    // dragging the corners
-    // remove the svg.circle() if the current container loses focus
     // Also, log any moving, for later communication
+    // e.on("dragend", (event) => {
+    //     let bb = mainItem.bbox();
+    //     console.log("End dimensions",bb);
+    // });
 
     return overlay
 }
