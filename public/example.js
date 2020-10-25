@@ -28,6 +28,7 @@ uplink.onopen = (event) => {
 };
 
 uplink.onmessage = (event) => {
+    console.log(event.data);
     let msg = JSON.parse(event.data);
     console.log(msg);
     if(    msg.boardname == boardname
@@ -442,7 +443,6 @@ function exportAsSvg() {
 /*
  * Next steps:
  *     Create item from template
- *     Store items server-side so a fresh client can be sent the items
  *     Handle item deletion
  *     Broadcast item deletion
  */

@@ -4,6 +4,13 @@ use Mojolicious::Sessions;
 use Mojolicious::Static;
 use Mojo::File;
 use Mojo::JSON 'decode_json', 'encode_json';
+use DBI;
+use DBD::SQLite;
+use DBIx::RunSQL;
+
+# in-memory DB, for now
+warn "Setting up DB";
+my $dbh = DBIx::RunSQL->create(sql => './sql/create.sql', dsn => 'dbi:SQLite:dbname=:memory:');
 
 my $sessions = Mojolicious::Sessions->new;
 $sessions->cookie_name('drawboard');
@@ -50,12 +57,18 @@ get '/board/:name' => sub($c) {
 
 # We should sanitize $msg here
 sub notify_listeners($roomname, $id, $message) {
+    my $str = encode_json($message);
+
     # First, store the message locally, for later replay
     # and consolidation of the document
+    $dbh->do(<<~SQL, {}, $roomname, $message->{info}->{id}, $str);
+        insert into drawboard_items
+               (drawboard,item,properties)
+        values (?,?,?)
+    SQL
 
     # Then, broadcast it to the room:
     my $board = fetch_board($roomname);
-    my $str = encode_json($message);
     for my $l (keys %{ $board->{listeners} }) {
         next if $l eq $id;
 
@@ -75,12 +88,29 @@ sub notify_listeners($roomname, $id, $message) {
     };
 };
 
+sub notify_listener($recipient, $message) {
+    use Data::Dumper; warn Dumper $message;
+    my $str = encode_json($message);
+
+    my $ok = eval {
+            # XXX fixme: Blindly forwarding messages is not nice
+        $connections{$recipient}->send($str);
+        1;
+    };
+    if( ! $ok ) {
+        warn "Client error: $@";
+        delete $connections{$recipient};
+    };
+};
+
 websocket '/uplink' => sub($c) {
     $sessions->load($c);
+    use Data::Dumper; warn Dumper $sessions;
     my $id = $sessions->{uid} || generate_session_id();
     $c->inactivity_timeout(3600);
 
     $connections{ $id } = $c;
+    warn "Client $id connected";
 
     # Maybe use Mojo::Pg and the Pg "notify" API instead of manually ferrying stuff?
 
@@ -95,6 +125,29 @@ websocket '/uplink' => sub($c) {
             my $board = fetch_board( $boardname );
             $board->{listeners}->{$id} = $c;
             warn "Subscribed clients for [$boardname] are ", join ",", sort keys %{ $board->{listeners} };
+
+            # Bring the client up to speed:
+            warn "Fetching Items in '$boardname'";
+            my $items = $dbh->selectall_arrayref(<<~SQL, { Slice => {}}, $boardname);
+                with drawboard_state as (
+                    select drawboard
+                         , item
+                         , properties
+                         , timestamp
+                         , rank() over (partition by drawboard, item order by timestamp desc) as pos
+                      from drawboard_items
+                     where drawboard = ?
+                )
+                select *
+                  from drawboard_state
+                  where pos = 1
+                 order by timestamp
+            SQL
+
+            for my $item (@$items) {
+                notify_listener($id,decode_json($item->{properties}));
+            };
+
         } else {
             warn "Notifying '$boardname' listeners about $action";
             notify_listeners($boardname, $id, $msg)
