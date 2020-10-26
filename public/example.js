@@ -29,6 +29,8 @@ uplink.onopen = (event) => {
     console.log("Connected, subscribing");
 };
 
+let users = {};
+
 uplink.onmessage = (event) => {
     console.log(event.data);
     let msg = JSON.parse(event.data);
@@ -50,6 +52,28 @@ uplink.onmessage = (event) => {
             };
         } else if( "delete" === msg.action ) {
             deleteItems(svg, [msg.info.id], false);
+        } else if( "mouseposition" === msg.action ) {
+            // makeUser();
+            if( ! users[ msg.info.uid ]) {
+                let g = svg.group();
+                let username = svg.text(msg.user);
+                username.move(16,0);
+                g.add( svg.circle(8));
+                g.add( username );
+
+                users[ msg.info.uid ] = {
+                    pointer: g,
+                    animation: undefined,
+                    // should set colour as well
+                };
+            };
+            // Animate instead of teleporting?!
+            if( users[ msg.info.uid ].animation ) {
+                users[ msg.info.uid ].animation.finish();
+            };
+            // Make cursor topmost
+            users[ msg.info.uid ].animation
+                = users[ msg.info.uid ].pointer.animate(100).center( msg.info.x, msg.info.y );
         } else if( "config" === msg.action ) {
             config = msg.info;
         };
@@ -61,6 +85,15 @@ function broadcastNoteState(noteInfo,eventname) {
         info: noteInfo,
         user: "???",
         action: eventname,
+        "boardname": boardname,
+    }));
+}
+
+function broadcastClientCursor(x,y) {
+    uplink.send(JSON.stringify({
+        info: { "x":x, "y":y },
+        user: config.username,
+        action: "mouseposition",
         "boardname": boardname,
     }));
 }
@@ -87,6 +120,16 @@ document.onkeydown = function (e) {
     };
 
     //console.log(e.keyCode);
+};
+
+document.onmousemove = (e) => {
+    if( svg.node.contains(e.target) ) {
+        // Convert from clientX/clientY to position in SVG
+        let pt = new SVG.Point(e.clientX, e.clientY);
+        let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
+        console.log("Client pos:", documentLoc);
+        broadcastClientCursor(documentLoc.x, documentLoc.y);
+    };
 };
 
 function deleteItems(svg,items,local) {
@@ -498,7 +541,6 @@ function exportAsSvg() {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
- *     Implement client cursors
  *     Implement rendering of multiple <TSPAN> lines properly
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
