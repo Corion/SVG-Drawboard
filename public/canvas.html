@@ -33,6 +33,10 @@ function setupGraph() {
   filter:url(#shadow);
 }
 
+.main {
+  filter:url(#shadow);
+}
+
 .insideforeign {
     background-color: gray;
     display: flex;
@@ -53,7 +57,7 @@ function setupGraph() {
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg1">
     <defs>
     <filter id="shadow" x="-20%" y="-20%" width="200%" height="200%">
-      <feDropShadow dx="20" dy="3" stdDeviation="5" flood-color="#5091b9" />
+      <feDropShadow dx="1" dy="1" stdDeviation="5" flood-color="#505050" />
     </filter>
     </defs>
 </svg>
