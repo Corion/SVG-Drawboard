@@ -398,6 +398,10 @@ function addSelectionOverlay(svg,singleItem) {
     toolbar.add(icon);
     icon.node.onclick = (e) => {
         console.log("Changing color");
+        let item = SVG.get(singleItem);
+        let noteInfo = getNoteInfo(item);
+        noteInfo.color = config.usercolor;
+        updateNote(svg,singleItem, noteInfo);
     };
 
     return overlay
@@ -406,10 +410,12 @@ function addSelectionOverlay(svg,singleItem) {
 function getNoteInfo( note ) {
     let t = SVG.select('.text', note.node).first();
     let bb = SVG.select('.main', note.node).first().bbox();
+    let color = SVG.select('.main', note.node).first().attr('fill');
     return {
         type   : 'note',
         id     : note.attr('id'),
         text   : t.text(),
+        "color": color,
         x      : note.x(),
         y      : note.y(),
         width  : bb.width,
@@ -423,7 +429,8 @@ function makeNote(svg, attrs) {
         t.tspan(attrs.text).attr({"fill":"black","font-weight":"bold"});
     });
     t.addClass('text');
-    let b = svg.rect().attr({"fill":"#ffe840"}).size(attrs.width,attrs.height);
+    let color = attrs.color || '#ffef40';
+    let b = svg.rect().attr({"fill":color}).size(attrs.width,attrs.height);
     b.addClass('main');
     let bb = b.bbox();
 
