@@ -5,6 +5,9 @@ var links = svg.group();
 var markers = svg.group();
 var defs = svg.defs();
 
+// Set by the "config" message, below
+let config = {};
+
 let loc = window.location;
 let href = loc.href;
 
@@ -47,9 +50,10 @@ uplink.onmessage = (event) => {
             };
         } else if( "delete" === msg.action ) {
             deleteItems(svg, [msg.info.id], false);
+        } else if( "config" === msg.action ) {
+            config = msg.info;
         };
     };
-    // console.log(msg);
 };
 
 function broadcastNoteState(noteInfo,eventname) {

@@ -170,6 +170,8 @@ websocket '/uplink' => sub($c) {
                  order by timestamp
             SQL
 
+            # Assign the user a name and an uid
+            notify_listener($id,{ action => "config", "username" => "user$id", uid => $id, boardname => $boardname, info => { "username" => "user$id", uid => $id } });
             for my $item (@$items) {
                 notify_listener($id,decode_json($item->{properties}));
             };
