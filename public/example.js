@@ -95,13 +95,18 @@ function broadcastNoteState(noteInfo,eventname) {
     }));
 }
 
+// We should debounce/throttle here, and on the server too
+let timerId;
 function broadcastClientCursor(x,y) {
-    uplink.send(JSON.stringify({
-        info: { "x":x, "y":y },
-        user: config.username,
-        action: "mouseposition",
-        "boardname": boardname,
-    }));
+    clearTimeout(timerId);
+    timerId = window.setTimeout(() => {
+        uplink.send(JSON.stringify({
+            info: { "x":x, "y":y },
+            user: config.username,
+            action: "mouseposition",
+            "boardname": boardname,
+        }));
+    }, 100);
 }
 
 /*

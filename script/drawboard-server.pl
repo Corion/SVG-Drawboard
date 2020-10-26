@@ -178,6 +178,10 @@ websocket '/uplink' => sub($c) {
 
         } else {
             #warn "Notifying '$boardname' listeners about $action";
+
+            # Debounce repeated/similar client mouse cursor movements and
+            # rate limit these so we don't flood the other clients
+
             notify_listeners($boardname, $id, $msg)
         };
     });
