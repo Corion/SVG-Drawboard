@@ -107,7 +107,7 @@ var template = {
 */
 
 // Hotkeys
-document.onkeydown = function (e) {
+document.onkeydown = (e) => {
     e = e || window.event;
     // use e.keyCode
     console.log(e.keyCode);
