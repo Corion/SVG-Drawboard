@@ -42,7 +42,7 @@ uplink.onmessage = (event) => {
     };
 
     if( msg.boardname == boardname ) {
-        if( /^(dragend|textedit)$/.test(msg.action)) {
+        if( /^(dragend|dragmove|textedit)$/.test(msg.action)) {
             // Last edit wins
             // We need to handle the user selection
             let oldOverlay = SVG.get("overlay");
@@ -153,7 +153,6 @@ document.onmousemove = (e) => {
         // Convert from clientX/clientY to position in SVG
         let pt = new SVG.Point(e.clientX, e.clientY);
         let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
-        console.log("Client pos:", documentLoc);
         broadcastClientCursor(documentLoc.x, documentLoc.y);
     };
 };
@@ -315,7 +314,7 @@ function addSelectionOverlay(svg,singleItem) {
         w.center(item.x()        ,  item.y()+newbb.h/2);
         e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
-        console.log("Moved to", w.cx(), n.cy(), newbb);
+        broadcastNoteState(noteInfo,'dragmove');
     };
 
     let dragmove_corner = (event) => {
@@ -355,13 +354,12 @@ function addSelectionOverlay(svg,singleItem) {
         let newNote = makeNote(svg,noteInfo);
         item = newNote;
 
-        console.log(event);
-
         // Adjust the four side handles
         n.center(item.x()+newbb.w/2,item.y()        );
         s.center(item.x()+newbb.w/2,item.y()+newbb.h);
         w.center(item.x()        ,  item.y()+newbb.h/2);
         e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
+        broadcastNoteState(noteInfo,'dragmove');
     };
 
     n.on("dragmove", dragmove_side );
