@@ -596,6 +596,7 @@ function exportAsSvg() {
  *     Implement read-only permissions
  *     Implement edit-only-own-stuff permissions
  *     Implement editor permissions
+ *     Implement local chat
  */
 
 // Bugs
