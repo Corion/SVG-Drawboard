@@ -219,7 +219,6 @@ function addSelectionOverlay(svg,singleItem) {
     let mainItem = SVG.select('.main',item.node).first();
     let bb = mainItem.bbox();
     let overlay = svg.group().attr({"id":"overlay"});
-        //.draggy();
     item.addClass('overlaid');
 
     overlay.add(item);
