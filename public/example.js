@@ -62,9 +62,9 @@ uplink.onmessage = (event) => {
             // makeUser();
             if( ! users[ msg.info.uid ]) {
                 let g = svg.group();
-                let username = svg.text(msg.user);
+                let username = svg.text(msg.user).fill(msg.info.usercolor);
                 username.move(16,0);
-                g.add( svg.circle(8));
+                g.add( svg.circle(8).fill(msg.info.usercolor));
                 g.add( username );
 
                 users[ msg.info.uid ] = {
@@ -79,7 +79,7 @@ uplink.onmessage = (event) => {
             };
             // Make cursor topmost
             users[ msg.info.uid ].animation
-                = users[ msg.info.uid ].pointer.animate(100).center( msg.info.x, msg.info.y );
+                = users[ msg.info.uid ].pointer.animate(10).center( msg.info.x, msg.info.y );
         } else if( "config" === msg.action ) {
             config = msg.info;
         };

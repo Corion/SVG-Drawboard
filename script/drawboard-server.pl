@@ -20,12 +20,23 @@ $sessions->default_expiration(86400);
 our %rooms;
 our %connections;
 
+our @usercolors = (
+    '#ff0066',
+    '#0066ff',
+    '#66ff00',
+    '#ff6600',
+    '#6600ff',
+    '#00ff66',
+);
+
 our $id = 1;
 sub generate_session_id {
     $id++;
     warn "Generating new id: $id";
     $id
 }
+
+our %users;
 
 push @{ app->static->paths }, Mojo::File->curfile->dirname->dirname->child('public');
 push @{ app->renderer->paths }, Mojo::File->curfile->dirname->dirname->child('templates');
@@ -171,7 +182,19 @@ websocket '/uplink' => sub($c) {
             SQL
 
             # Assign the user a name and an uid
-            notify_listener($id,{ action => "config", "username" => "user$id", uid => $id, boardname => $boardname, info => { "username" => "user$id", uid => $id } });
+            $users{ $id } = {
+                "username" => "user$id",
+                uid => $id,
+                usercolor => @usercolors[ $id % @usercolors ],
+            };
+            warn "User $id gets color " . $users{$id}->{usercolor};
+            notify_listener($id,{
+                action => "config",
+                "username" => "user$id",
+                uid => $id,
+                boardname => $boardname,
+                info => $users{ $id },
+            });
             for my $item (@$items) {
                 notify_listener($id,decode_json($item->{properties}));
             };
@@ -181,6 +204,13 @@ websocket '/uplink' => sub($c) {
 
             # Debounce repeated/similar client mouse cursor movements and
             # rate limit these so we don't flood the other clients
+
+            if( $msg->{action} eq 'mouseposition' ) {
+                # do we really want to do this patching all the time or
+                # just once upon connection of users in a config broadcast?
+                $msg->{info}->{usercolor} = $users{ $id }->{usercolor};
+                $msg->{info}->{uid} = $id;
+            };
 
             notify_listeners($boardname, $id, $msg)
         };
