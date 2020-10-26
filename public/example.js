@@ -70,7 +70,6 @@ var template = {
 */
 
 // Hotkeys
-
 document.onkeydown = function (e) {
     e = e || window.event;
     // use e.keyCode
@@ -495,9 +494,14 @@ function exportAsSvg() {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
- *     Implement moving of the viewbox (SVG.ViewBox) and zooming
- *     Implement defined zones where you can one-click to move/zoom to
  *     Implement client cursors
+ *     Implement rendering of multiple <TSPAN> lines properly
+ *     Implement handling of multiline input into <TSPAN>
+ *     Implement white-black-white border around (single) selected item(s)
+ *     Implement rate limiting of identical message types (type+id, maximum 10/s)
+ *     Implement moving of the viewbox (SVG.ViewBox) and zooming
+ *     Implement layers, or at least a background layer
+ *     Implement defined zones where you can one-click to move/zoom to
  *     Implement (inline) images
  *     Implement command line client for creating notes
  *     Implement command line client for uploading images
@@ -506,10 +510,17 @@ function exportAsSvg() {
  *     Implement touch support for handles
  *     Implement touch support for moving (separate move handle)
  *     Implement support for rotation
+ *     Implement tool modes
+ *     Implement note creation tool
  *     Implement touch support for rotating (separate rotation handle)
  *     Implement download of the SVG, and download of a JSON describing the SVG
  *     Implement upload of random SVGs (?)
  *     Create item from template
+ *     Implement "join as guest" gateway page that asks for username and password
+ *     Implement permissions
+ *     Implement read-only permissions
+ *     Implement edit-only-own-stuff permissions
+ *     Implement editor permissions
  */
 
 // Bugs
