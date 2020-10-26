@@ -200,12 +200,12 @@ function addSelectionOverlay(svg,singleItem) {
         let contained = SVG.get(containedId);
 
         if( contained ) {
-            let cx = oldOverlay.cx();
-            let cy = oldOverlay.cy();
+            let pos = new SVG.Matrix(contained);
+
             oldOverlay.replace(contained);
 
             // Move the contained object into the correct position
-            contained.center(cx,cy);
+            contained.transform(pos);
 
             contained.removeClass('overlaid');
         } else {
