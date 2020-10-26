@@ -33,8 +33,14 @@ let users = {};
 
 uplink.onmessage = (event) => {
     console.log(event.data);
-    let msg = JSON.parse(event.data);
-    console.log(msg);
+    let msg;
+    try {
+        msg = JSON.parse(event.data);
+    } catch (e) {
+        console.log("JSON parse error:",e);
+        return;
+    };
+
     if( msg.boardname == boardname ) {
         if( /^(dragend|textedit)$/.test(msg.action)) {
             // Last edit wins
