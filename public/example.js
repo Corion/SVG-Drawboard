@@ -89,7 +89,7 @@ uplink.onmessage = (event) => {
 function broadcastNoteState(noteInfo,eventname) {
     uplink.send(JSON.stringify({
         info: noteInfo,
-        user: "???",
+        user: config.username,
         action: eventname,
         "boardname": boardname,
     }));
