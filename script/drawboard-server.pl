@@ -83,8 +83,8 @@ sub notify_listeners($roomname, $id, $message) {
     for my $l (keys %{ $board->{listeners} }) {
         next if $l eq $id;
 
-        warn "Sending to $id";
-        warn "Connected clients are ", join ",", sort keys %connections;
+        #warn "Sending to $id";
+        #warn "Connected clients are ", join ",", sort keys %connections;
 
         my $ok = eval {
             # XXX fixme: Blindly forwarding messages is not nice
@@ -177,7 +177,7 @@ websocket '/uplink' => sub($c) {
             };
 
         } else {
-            warn "Notifying '$boardname' listeners about $action";
+            #warn "Notifying '$boardname' listeners about $action";
             notify_listeners($boardname, $id, $msg)
         };
     });
