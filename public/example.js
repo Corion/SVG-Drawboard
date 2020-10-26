@@ -374,11 +374,31 @@ function addSelectionOverlay(svg,singleItem) {
     ne.on("dragmove",dragmove_corner);
     se.on("dragmove",dragmove_corner);
 
-    // Also, log any moving, for later communication
-    // e.on("dragend", (event) => {
-    //     let bb = mainItem.bbox();
-    //     console.log("End dimensions",bb);
-    // });
+    // XXX the toolbar should have a fixed size, irrespective of zoom
+    //     while the items should resize with the zoom
+    // Add the toolbar, above the (single) selected item
+    // Later, make the toolbar items dynamic
+    let toolbar = svg.group();
+    let toolbarBG = svg.rect(128,48).fill('#fff').stroke('#444');
+    let obb = overlay.bbox();
+    let toolbar_pos = { x: overlay.cx(), y: obb.y - toolbarBG.cy() - 8};
+    toolbarBG.center(overlay.cx(), obb.y - toolbarBG.cy() - 8);
+    toolbar.add(toolbarBG);
+    overlay.add(toolbar);
+
+    // Color chooser
+    let icon = svg.group();
+    let iconColor = svg.circle(32).fill(config.usercolor).stroke('#444');
+    iconColor.center( toolbarBG.x() + 24, toolbarBG.y()+toolbarBG.height()/2 );
+    let triangle = svg.polygon('8,8 8,0 0,8').fill('black');
+    let ibb = iconColor.bbox();
+    triangle.move(ibb.x2 -8, ibb.y2 -8);
+    icon.add(iconColor);
+    icon.add(triangle);
+    toolbar.add(icon);
+    icon.node.onclick = (e) => {
+        console.log("Changing color");
+    };
 
     return overlay
 }
@@ -597,6 +617,7 @@ function exportAsSvg() {
  *     Implement edit-only-own-stuff permissions
  *     Implement editor permissions
  *     Implement local chat
+ *     Implement dynamic sizing etc. of the toolbar
  */
 
 // Bugs
