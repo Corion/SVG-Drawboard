@@ -87,6 +87,8 @@ uplink.onmessage = (event) => {
 };
 
 function broadcastNoteState(noteInfo,eventname) {
+    // Debounce this just like client cursors, except keyed on the note id
+    // as well.
     uplink.send(JSON.stringify({
         info: noteInfo,
         user: config.username,
@@ -358,6 +360,7 @@ function addSelectionOverlay(svg,singleItem) {
         s.center(item.x()+newbb.w/2,item.y()+newbb.h);
         w.center(item.x()        ,  item.y()+newbb.h/2);
         e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
+
         broadcastNoteState(noteInfo,'dragmove');
     };
 
@@ -419,14 +422,16 @@ function makeNote(svg, attrs) {
     });
 
     g.draggy().on("dragend", (event) => {
-        console.log("End",event);
+        //console.log("End",event);
         addSelectionOverlay(svg, event.target.instance.attr('id'));
         let nodeInfo = getNoteInfo(event.target.instance);
         broadcastNoteState(nodeInfo,'dragend');
     });
     g.draggy().on("dragmove", (event) => {
-        console.log("Move",event);
+        // console.log("Move",event);
         addSelectionOverlay(svg, event.target.instance.attr('id'));
+        let nodeInfo = getNoteInfo(event.target.instance);
+        broadcastNoteState(nodeInfo,'dragend');
     });
 
     if( attrs.id ) {
@@ -564,6 +569,7 @@ function exportAsSvg() {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
+ *     Implement broadcast of client disconnects and cursor cleanup
  *     Implement rendering of multiple <TSPAN> lines properly
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
