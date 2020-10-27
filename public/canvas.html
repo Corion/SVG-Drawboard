@@ -50,6 +50,16 @@ function setupGraph() {
     width: 100%,
     height: 100%,
 }
+
+/* Should stick to the lower left corner of #svg1, later*/
+#thumbview {
+    width: 180px;
+    height: 180px;
+    /* position: absolute; */
+    display: inline-block;
+    border: 1px solid black;
+}
+
 </style>
 </head>
 <body onload="javascript:setupGraph()">
@@ -61,6 +71,13 @@ function setupGraph() {
     </filter>
     </defs>
 </svg>
+<div id="thumbview">
+    <!-- later, adjust the viewbox to #svg1 dimensions -->
+    <!-- later, render the current viewport as rect() over the other document -->
+    <svg xmlns:xlink="http://www.w3.org/1999/xlink" viewbox="0 0 1000 1000">
+        <use xlink:href="#svg1" />
+    </svg>
+</div>
 <script type="text/javascript" src="../example.js"></script>
 <button onclick="javascript:exportAsSvg()" href="#">Save</button>
 <button onclick="javascript:createNote()" href="#">Note</button>
