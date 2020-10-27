@@ -159,6 +159,28 @@ document.onmousemove = (e) => {
     };
 };
 
+document.onwheel = function(e) {
+    if( svg.node.contains(e.target) ) {
+        e.preventDefault();
+        let viewbox = svg.viewbox();
+
+        // One scroll event means 5% change in zoom
+        let scale = 1 + Math.sign(e.deltaY) * 0.05;
+
+        // Why doesn't viewbox inherit from SVG.Box?!
+        console.log(viewbox);
+        let b = new SVG.Box(viewbox);
+        b = b.transform(new SVG.Matrix(scale,0,0,scale, 0,0));
+
+        let pt = new SVG.Point(e.clientX, e.clientY);
+        let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
+        b.x -= (documentLoc.x * (scale-1));
+        b.y -= (documentLoc.y * (scale-1));
+        console.log(b.w);
+        svg.viewbox(b);
+    };
+    // Otherwise, handle it as default
+}
 function deleteItems(svg,items,local) {
     let oldOverlay = SVG.get("overlay");
     let containedId;
@@ -601,7 +623,7 @@ function exportAsSvg() {
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
  *     Implement rate limiting of identical message types (type+id, maximum 10/s)
- *     Implement moving of the viewbox (SVG.ViewBox) and zooming
+ *     Implement moving of the viewbox (SVG.ViewBox)
  *     Implement layers, or at least a background layer
  *     Implement defined zones where you can one-click to move/zoom to
  *     Implement (inline) images
