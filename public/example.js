@@ -695,6 +695,10 @@ function exportAsSvg() {
  *     Implement editor permissions
  *     Implement local chat
  *     Implement dynamic sizing etc. of the toolbar
+ *     Update the minimap viewbox whenever the used document range of the
+ *       document changes
+ *     Update the minimap with the currently displayed client range
+ *     Scale the client cursors inverse to our zoom
  */
 
 // Bugs
