@@ -141,6 +141,9 @@ document.onkeydown = (e) => {
     console.log(e.keyCode);
 
     switch(e.keyCode) {
+        // "N" - makeNote
+        // "B" - showNavigationPane
+
         case 46: // del
                  deleteCurrentSelection();
                  break;
