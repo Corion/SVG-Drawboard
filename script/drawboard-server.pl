@@ -125,6 +125,11 @@ sub notify_listener($recipient, $message) {
     };
 };
 
+# Stuff that we might not want to store in the DB, or purge more quickly
+our %ephemeral_messagetypes = (
+    'mouseposition',
+);
+
 websocket '/uplink' => sub($c) {
     $sessions->load($c);
     use Data::Dumper; warn Dumper $sessions;
