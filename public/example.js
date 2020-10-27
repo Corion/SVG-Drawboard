@@ -212,6 +212,13 @@ document.onwheel = function(e) {
         b.y -= (documentLoc.y * (scale-1));
         console.log(b.w);
         svg.viewbox(b);
+
+        let oldOverlay = SVG.get("overlay");
+        if( oldOverlay ) {
+            let containedId = oldOverlay.data("overlaid");
+            addSelectionOverlay(svg, containedId);
+        };
+        // broadcastClientViewport();
     };
     // Otherwise, handle it as default
 }
@@ -270,6 +277,7 @@ function addSelectionOverlay(svg,singleItem) {
         };
     };
 
+    let scale = 1/svg.viewbox().zoom;
     let item = SVG.get(singleItem);
     if( ! item ) {
         console.log("No item found for id '"+singleItem+"' (?!)");
@@ -283,56 +291,56 @@ function addSelectionOverlay(svg,singleItem) {
     overlay.data("overlaid",item,true); // We want to store an object reference
 
     // Add eight svg.circle() as handles for sizing the selection
-    let w = svg.circle(8);
+    let w = svg.circle(8*scale);
     w.center(0+item.x(),item.y()+bb.h/2);
     w.draggy((x,y) => {
         return {"x":x,"y":false}
     });
     overlay.add(w);
 
-    let e = svg.circle(8);
+    let e = svg.circle(8*scale);
     e.center(bb.w+item.x(),item.y()+bb.h/2);
     e.draggy((x,y) => {
         return {"x":x,"y":false}
     });
     overlay.add(e);
 
-    let n = svg.circle(8);
+    let n = svg.circle(8*scale);
     n.center(bb.w/2+item.x(),item.y()+0);
     n.draggy((x,y) => {
         return {"x":false,"y":y}
     });
     overlay.add(n);
 
-    let s = svg.circle(8);
+    let s = svg.circle(8*scale);
     s.center(bb.w/2+item.x(),item.y()+bb.h);
     s.draggy((x,y) => {
         return {"x":false,"y":y}
     });
     overlay.add(s);
 
-    let nw = svg.circle(8);
+    let nw = svg.circle(8*scale);
     nw.center(0+item.x(),0+item.y());
     nw.draggy((x,y) => {
         return {"x":x,"y":y}
     });
     overlay.add(nw);
 
-    let ne = svg.circle(8);
+    let ne = svg.circle(8*scale);
     ne.center(item.x()+bb.w,0+item.y());
     ne.draggy((x,y) => {
         return {"x":x,"y":y}
     });
     overlay.add(ne);
 
-    let se = svg.circle(8);
+    let se = svg.circle(8*scale);
     se.center(item.x()+bb.w,bb.h+item.y());
     se.draggy((x,y) => {
         return {"x":x,"y":y}
     });
     overlay.add(se);
 
-    let sw = svg.circle(8);
+    let sw = svg.circle(8*scale);
     sw.center(item.x()+0,bb.h+item.y());
     sw.draggy((x,y) => {
         return {"x":x,"y":y}
@@ -434,21 +442,27 @@ function addSelectionOverlay(svg,singleItem) {
     //     while the items should resize with the zoom
     // Add the toolbar, above the (single) selected item
     // Later, make the toolbar items dynamic
+
+    // Scale the toolbar inverse to our zoom, so the size in pixels remains constant
+    let scaleM = new SVG.Matrix(scale,0,0,scale,0,0);
+    let selectionBB = overlay.bbox();
     let toolbar = svg.group();
-    let toolbarBG = svg.rect(128,48).fill('#fff').stroke('#444');
-    let obb = overlay.bbox();
-    let toolbar_pos = { x: overlay.cx(), y: obb.y - toolbarBG.cy() - 8};
-    toolbarBG.center(overlay.cx(), obb.y - toolbarBG.cy() - 8);
+    let toolbarSize = new SVG.Box(0,0,128,48).transform(scaleM);
+    let toolbarBG = svg.rect(toolbarSize.w, toolbarSize.h).fill('#fff').stroke('#444').attr({ "stroke-width": 1*scale });
+    let obb = overlay.bbox(); // Adjust for sides of the viewbox, later
+    toolbarBG.center(overlay.cx(), obb.y - toolbarBG.cy() - 8*scale);
     toolbar.add(toolbarBG);
     overlay.add(toolbar);
 
     // Color chooser
     let icon = svg.group();
-    let iconColor = svg.circle(32).fill(config.usercolor).stroke('#444');
-    iconColor.center( toolbarBG.x() + 24, toolbarBG.y()+toolbarBG.height()/2 );
+    let iconColor = svg.circle(32*scale).fill(config.usercolor).stroke('#444').attr({ "stroke-width": 1*scale });
+    iconColor.center( toolbarBG.x() + 24*scale, toolbarBG.y()+toolbarBG.height()/2 );
     let triangle = svg.polygon('8,8 8,0 0,8').fill('black');
+    let irb = iconColor.rbox();
     let ibb = iconColor.bbox();
-    triangle.move(ibb.x2 -8, ibb.y2 -8);
+    triangle.transform(new SVG.Matrix(scale,0,0,scale,iconColor.x()+iconColor.width()-8*scale,iconColor.y()+iconColor.height()-8*scale));
+
     icon.add(iconColor);
     icon.add(triangle);
     toolbar.add(icon);
