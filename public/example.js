@@ -134,6 +134,37 @@ var template = {
 };
 */
 
+function selectTool(tool) {
+    let callback;
+    let cursor;
+    switch (tool) {
+        case "selector":
+            callback = (e) => {
+                /* reset cursor */
+            };
+            /* cursor = ...; */
+            break;
+        case "makeNote":
+            callback = (e) => {
+                /* reset cursor */
+                selectTool("selector");
+            };
+            /* cursor = ...; */
+            break;
+    }
+
+    if( callback ) {
+        svg.on("click", callback);
+    } else {
+        // Can we always switch off the callback? This conflicts with
+        // the normal selection ...
+        svg.off("click", callback);
+    };
+    /* set cursor too */
+
+
+}
+
 // Hotkeys
 document.onkeydown = (e) => {
     e = e || window.event;
