@@ -81,10 +81,15 @@ uplink.onmessage = (event) => {
             users[ msg.info.uid ].animation
                 = users[ msg.info.uid ].pointer.animate(10).center( msg.info.x, msg.info.y );
         } else if( "config" === msg.action ) {
-            config = msg.info;
+            updateConfig(msg.info);
         };
     };
 };
+
+function updateConfig(config) {
+    config = msg.info;
+    document.title = config.boardname + " - Drawboard";
+}
 
 function broadcastNoteState(noteInfo,eventname) {
     // Debounce this just like client cursors, except keyed on the note id
