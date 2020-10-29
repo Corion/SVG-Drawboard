@@ -190,14 +190,40 @@ document.onkeydown = (e) => {
     //console.log(e.keyCode);
 };
 
+let isPanning;
+let panStartPoint;
+let panStartViewbox;
 document.onmousemove = (e) => {
     if( svg.node.contains(e.target) ) {
         // Convert from clientX/clientY to position in SVG
         let pt = new SVG.Point(e.clientX, e.clientY);
         let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
         broadcastClientCursor(documentLoc.x, documentLoc.y);
+
+        if (isPanning){
+            let vb = panStartViewbox;
+            let dx = (panStartPoint.x - e.x)/vb.zoom;
+            let dy = (panStartPoint.y - e.y)/vb.zoom;
+            let movedViewBox = {x:vb.x+dx,y:vb.y+dy,width:vb.width,height:vb.height};
+            svg.viewbox(movedViewBox.x,movedViewBox.y,movedViewBox.width,movedViewBox.height);
+            // broadcastClientViewbox
+        };
     };
 };
+
+document.onmousedown = (e) => {
+    if( e.which === 2) { // Middle button pans
+        isPanning = true;
+        panStartPoint = {x:e.x,y:e.y};
+        panStartViewbox = svg.viewbox();
+    };
+}
+
+document.onmouseup = (e) => {
+    if( e.which === 2) { // Middle button pans
+        isPanning = false;
+    };
+}
 
 document.onwheel = function(e) {
     if( svg.node.contains(e.target) ) {
@@ -208,7 +234,6 @@ document.onwheel = function(e) {
         let scale = 1 + Math.sign(e.deltaY) * 0.05;
 
         // Why doesn't viewbox inherit from SVG.Box?!
-        console.log(viewbox);
         let b = new SVG.Box(viewbox);
         b = b.transform(new SVG.Matrix(scale,0,0,scale, 0,0));
 
