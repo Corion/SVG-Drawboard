@@ -198,7 +198,10 @@ websocket '/uplink' => sub($c) {
                 "username" => "user$id",
                 uid => $id,
                 boardname => $boardname,
-                info => $users{ $id },
+                info => {
+                    %{$users{ $id }},
+                    boardname => $boardname,
+                },
             });
             for my $item (@$items) {
                 notify_listener($id,decode_json($item->{properties}));

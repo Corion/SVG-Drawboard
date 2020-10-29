@@ -86,8 +86,8 @@ uplink.onmessage = (event) => {
     };
 };
 
-function updateConfig(config) {
-    config = msg.info;
+function updateConfig(aConfig) {
+    config = aConfig;
     document.title = config.boardname + " - Drawboard";
 }
 
