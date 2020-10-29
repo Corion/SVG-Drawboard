@@ -91,44 +91,61 @@ function updateConfig(aConfig) {
     document.title = config.boardname + " - Drawboard";
 }
 
-function broadcastNoteState(noteInfo,eventname) {
-    // Debounce this just like client cursors, except keyed on the note id
-    // as well.
-    uplink.send(JSON.stringify({
-        info: noteInfo,
-        user: config.username,
-        action: eventname,
-        "boardname": boardname,
-    }));
-}
+// generic message throttler generator
+// Returns a function that will throttle
+function mkThrottledBroadcaster(delay,keycols) {
+    // Our information about the last messages sent
+    // Later, clean out message keys after 1s (or whatever) to prevent
+    // bloating the list of last messages sent
+    let lastItem = {};
+    return (msg) => {
+        let key = (keycols.map( (k) => { msg[k] } )).join("\0");
+
+        let info = lastItem[key];
+        if( ! info) {
+            info = lastItem[key] = {};
+        };
+
+        info.latestMsg = msg;
+
+        if( ! info.timerId ) {
+            uplink.send(JSON.stringify(msg));
+            info.latestMsg = undefined;
+
+            info.timerId = window.setTimeout(() => {
+                if( info.latestMsg ) {
+                    uplink.send(JSON.stringify(info.latestMsg));
+                    info.latestMsg = undefined;
+                };
+                info.timerId = undefined;
+            }, 100);
+        };
+    }
+};
 
 // debounce/throttle here, and on the server too
-let timerId;
-let lastPos;
+let throttledBroadcastClientCursor = mkThrottledBroadcaster(100,[]);
 function broadcastClientCursor(x,y) {
-    lastPos = { "x":x, "y":y };
-    if( !timerId ) {
-        uplink.send(JSON.stringify({
+    let lastPos = { "x":x, "y":y };
+    throttledBroadcastClientCursor({
             info: lastPos,
             user: config.username,
             action: "mouseposition",
             "boardname": boardname,
-        }));
-        lastPos = undefined;
+    });
+}
 
-        timerId = window.setTimeout(() => {
-            if( lastPos ) {
-                uplink.send(JSON.stringify({
-                    info: lastPos,
-                    user: config.username,
-                    action: "mouseposition",
-                    "boardname": boardname,
-                }));
-                lastPos = undefined;
-            };
-            timerId = undefined;
-        }, 100);
-    };
+let throttledBroadcastNoteState = mkThrottledBroadcaster(1,["id"]);
+function broadcastNoteState(noteInfo,eventname) {
+    // Debounce this just like client cursors, except keyed on the note id
+    // as well.
+    throttledBroadcastNoteState({
+        info: noteInfo,
+        id: noteInfo.id,
+        user: config.username,
+        action: eventname,
+        "boardname": boardname,
+    });
 }
 
 /*
@@ -309,6 +326,7 @@ function addSelectionOverlay(svg,singleItem) {
     };
 
     let scale = 1/svg.viewbox().zoom;
+
     let item = SVG.get(singleItem);
     if( ! item ) {
         console.log("No item found for id '"+singleItem+"' (?!)");
@@ -709,7 +727,6 @@ function exportAsSvg() {
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
  *     Implement rate limiting of identical message types (type+id, maximum 10/s)
- *     Implement moving of the viewbox (SVG.ViewBox)
  *     Implement layers, or at least a background layer
  *     Implement defined zones where you can one-click to move/zoom to
  *     Implement (inline) images
