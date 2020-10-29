@@ -179,6 +179,7 @@ document.onkeydown = (e) => {
     switch(e.keyCode) {
         // "N" - makeNote
         // "B" - showNavigationPane
+        // "<space>" - (while held down) selectPanTool
 
         case 46: // del
                  deleteCurrentSelection();
