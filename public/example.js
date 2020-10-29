@@ -736,7 +736,15 @@ function exportAsSvg() {
  *     Update the minimap viewbox whenever the used document range of the
  *       document changes
  *     Update the minimap with the currently displayed client range
+ *     The UI should remain fixed (on the SVG board) while panning
  *     Scale the client cursors inverse to our zoom
+ *     Separate the board-URL from the boardname
+ *     Reconnect the websocket upon disconnect - how will we synch up then?
+ *         a) Transfer the current server state, losing all local edits
+ *         b) better sync, from the time of last sync onwards, in both
+ *            directions. This will be hard.
+ *     Remove the selection UI if the selection is discarded by clicking on the
+ *       canvas itself
  */
 
 // Bugs
