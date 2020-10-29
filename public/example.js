@@ -470,11 +470,18 @@ function addSelectionOverlay(svg,singleItem) {
     se.on("dragmove",dragmove_corner);
 
     // XXX the toolbar should have a fixed size, irrespective of zoom
-    //     while the items should resize with the zoom
+    //     while the items should resize with the zoom. We should do this by
+    //     creating the toolbar as a subdocument, and then resizing the whole
+    //     subdocument inverse to the zoom, instead of resizing the individual
+    //     elements. Or maybe have the toolbar as HTML, outside of the SVG...
     // Add the toolbar, above the (single) selected item
     // Later, make the toolbar items dynamic
 
-    // Scale the toolbar inverse to our zoom, so the size in pixels remains constant
+    // Scale the toolbar inverse to our zoom, so the size in pixels remains
+    // constant
+    // Consider using a HTML foreignobject to prevent the inner elements from scaling
+    // with the SVG document. This means that the UI won't show up in the
+    // minimap as well.
     let scaleM = new SVG.Matrix(scale,0,0,scale,0,0);
     let selectionBB = overlay.bbox();
     let toolbar = svg.group();
