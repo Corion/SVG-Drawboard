@@ -127,7 +127,7 @@ sub notify_listener($recipient, $message) {
 
 # Stuff that we might not want to store in the DB, or purge more quickly
 our %ephemeral_messagetypes = (
-    'mouseposition',
+    'mouseposition' => 1,
 );
 
 websocket '/uplink' => sub($c) {
