@@ -11,7 +11,7 @@ let config = {};
 let loc = window.location;
 let href = loc.href;
 
-let parts = href.match(/^http(s?):\/\/(.*\/)([\w\.]+)$/);
+let parts = href.match(/^http(s?):\/\/(.*\/)([\w\.-]+)$/);
 if(! parts) {
     console.log("Don't understand the URL '"+href+"'");
 };
