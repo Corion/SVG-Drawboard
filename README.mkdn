@@ -1,0 +1,44 @@
+
+[![Travis Build Status](https://travis-ci.org/Corion/SVG-Drawboard.svg?branch=master)](https://travis-ci.org/Corion/SVG-Drawboard)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Corion/SVG-Drawboard?branch=master&svg=true)](https://ci.appveyor.com/project/Corion/SVG-Drawboard)
+
+# NAME
+
+SVG::Drawboard - server for a multiplayer SVG whiteboard
+
+# DESCRIPTION
+
+This implements a Javascript client and a Perl server for allowing multi-client
+creation and manipulation of sticky notes on an SVG canvas using websockets.
+
+# MESSAGES
+
+The following messages are currently sent:
+
+## SERVER MESSAGES
+
+- config
+
+    The configuration data for the current client
+
+    This includes the board name and the client display name
+
+- disconnect
+
+    Sent when a different client has disconnected
+
+## CLIENT MESSAGES
+
+- dragend
+- dragmove
+- textedit
+
+    Sent by a client whenever an item gets moved or changed
+
+- delete
+
+    Sent by a client whenever an item is deleted
+
+- mouseposition
+
+    Sent whenever the client mouse pointer changes position
