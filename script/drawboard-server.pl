@@ -153,6 +153,26 @@ websocket '/uplink' => sub($c) {
             $board->{listeners}->{$id} = $c;
             warn "Subscribed clients for [$boardname] are ", join ",", sort keys %{ $board->{listeners} };
 
+            # Assign the user a name and an uid
+            $users{ $id } = {
+                "username"        => "user$id",
+                uid               => $id,
+                boardname         => $boardname, # currently, each user can only be in a single board
+                usercolor         => @usercolors[ $id % @usercolors ],
+                connection_prefix => $id,
+            };
+            # warn "User $id gets color " . $users{$id}->{usercolor};
+            notify_listener($id,{
+                action => "config",
+                "username" => "user$id",
+                uid => $id,
+                boardname => $boardname,
+                info => {
+                    %{$users{ $id }},
+                    boardname => $boardname,
+                },
+            });
+
             # Bring the client up to speed:
             warn "Fetching Items in '$boardname'";
             #my $sth = $dbh->prepare(<<~SQL);
@@ -186,24 +206,6 @@ websocket '/uplink' => sub($c) {
                  order by timestamp
 SQL
 
-            # Assign the user a name and an uid
-            $users{ $id } = {
-                "username" => "user$id",
-                uid => $id,
-                boardname => $boardname, # currently, each user can only be in a single board
-                usercolor => @usercolors[ $id % @usercolors ],
-            };
-            warn "User $id gets color " . $users{$id}->{usercolor};
-            notify_listener($id,{
-                action => "config",
-                "username" => "user$id",
-                uid => $id,
-                boardname => $boardname,
-                info => {
-                    %{$users{ $id }},
-                    boardname => $boardname,
-                },
-            });
             for my $item (@$items) {
                 notify_listener($id,decode_json($item->{properties}));
             };

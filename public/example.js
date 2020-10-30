@@ -626,6 +626,9 @@ function makeNote(svg, attrs) {
             };
         };
         g.attr('id', attrs.id);
+    } else {
+        // Assign our prefix here to prevent collisions with other clients
+        g.id(config.connection_prefix+"-"+g.id());
     };
 
     return g
