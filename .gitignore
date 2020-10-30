@@ -17,3 +17,5 @@ frame-*.png
 .prove
 .patch
 moodboard/
+db/
+drawboard.conf
