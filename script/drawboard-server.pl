@@ -11,10 +11,10 @@ use DBIx::RunSQL;
 # in-memory DB, for now
 warn "Setting up DB";
 my $dbh = DBIx::RunSQL->create(sql => './sql/create.sql', dsn => 'dbi:SQLite:dbname=:memory:');
+#my $sessions = Mojolicious::Sessions->new;
+#$sessions->cookie_name('drawboard');
+#$sessions->default_expiration(86400);
 
-my $sessions = Mojolicious::Sessions->new;
-$sessions->cookie_name('drawboard');
-$sessions->default_expiration(86400);
 
 # Consider moving this later to Socket.io nomenclature and API
 our %rooms;
@@ -133,9 +133,9 @@ our %ephemeral_messagetypes = (
 );
 
 websocket '/uplink' => sub($c) {
-    $sessions->load($c);
-    use Data::Dumper; warn Dumper $sessions;
-    my $id = $sessions->{uid} || generate_session_id();
+    #$sessions->load($c);
+    #use Data::Dumper; warn Dumper $sessions;
+    my $id = generate_session_id();
     $c->inactivity_timeout(3600);
 
     $connections{ $id } = $c;
