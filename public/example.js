@@ -304,7 +304,6 @@ function deleteItems(svg,items,local) {
         };
     };
 }
-*/
 
 // Go through all notes (or all SVG elements?) and update our bounding box
 function recalculateDocumentDimensions(svg) {
