@@ -80,6 +80,14 @@ uplink.onmessage = (event) => {
             // Make cursor topmost
             users[ msg.info.uid ].animation
                 = users[ msg.info.uid ].pointer.animate(10).center( msg.info.x, msg.info.y );
+
+        } else if( "disconnect" === msg.action ) {
+            // makeUser();
+            if( users[ msg.info.uid ]) {
+                users[ msg.info.uid ].pointer.remove();
+                delete users[ msg.info.uid ];
+            };
+
         } else if( "config" === msg.action ) {
             updateConfig(msg.info);
         };
@@ -570,7 +578,7 @@ function makeNote(svg, attrs) {
 
     t.on('click', startTextEditing);
     g.on('mousedown', (event) => {
-        console.log("Selected single group");
+        // console.log("Selected single group");
         let overlay = addSelectionOverlay(svg, g.attr('id'));
     });
 
@@ -593,7 +601,7 @@ function makeNote(svg, attrs) {
             if( oldNode === g ) {
                 console.log("Old and new node are identical?!");
             } else {
-                console.log("Replacing old item", oldNode, g);
+                // console.log("Replacing old item", oldNode, g);
                 oldNode.replace( g );
             };
         };
@@ -722,7 +730,6 @@ function exportAsSvg() {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
- *     Implement broadcast of client disconnects and cursor cleanup
  *     Implement rendering of multiple <TSPAN> lines properly
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
@@ -770,5 +777,7 @@ function exportAsSvg() {
  *           Fixing this likely requires parsing .text() for newlines,
  *           converting between these and <tspan> objects
  *     * [ ] We don't handle the z-order of items at all
+ *     * [ ] Zoomed mouse cursor position doesn't match up. This might be
+ *           that draggy.js doesn't handle zoom well?!
  *
  */

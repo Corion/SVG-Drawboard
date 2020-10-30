@@ -190,6 +190,7 @@ websocket '/uplink' => sub($c) {
             $users{ $id } = {
                 "username" => "user$id",
                 uid => $id,
+                boardname => $boardname, # currently, each user can only be in a single board
                 usercolor => @usercolors[ $id % @usercolors ],
             };
             warn "User $id gets color " . $users{$id}->{usercolor};
@@ -227,7 +228,20 @@ websocket '/uplink' => sub($c) {
     $c->on(finish => sub(@foo) {
         warn "Disconnected $id";
         my( $c ) = @foo;
+
         delete $connections{ $id };
+        if( my $user = delete $users{ $id }) {
+            my $msg = {
+                action => 'disconnect',
+                uid => $id,
+                username => $user->{username},
+                boardname => $user->{boardname},
+                info => {
+                    %{$user},
+                },
+            };
+            notify_listeners($user->{boardname}, $id, $msg)
+        };
     });
 };
 
