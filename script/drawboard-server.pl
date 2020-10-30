@@ -29,11 +29,13 @@ our @usercolors = (
     '#00ff66',
 );
 
-our $id = 1;
+
+{ state $id = 1;
 sub generate_session_id {
     $id++;
     warn "Generating new id: $id";
     $id
+}
 }
 
 our %users;
