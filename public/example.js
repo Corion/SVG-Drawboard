@@ -430,10 +430,12 @@ function addSelectionOverlay(svg,singleItem) {
 
         // Reconstruct width/height, then set it
         let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
+        //console.log(e,newbb.w);
         noteInfo.width = newbb.w;
         noteInfo.height = newbb.h;
         noteInfo.x = w.cx();
         noteInfo.y = n.cy();
+        //console.log(newbb.w);
         let newNote = makeNote(svg,noteInfo);
 
         let info = {
