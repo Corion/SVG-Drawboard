@@ -798,7 +798,5 @@ function exportAsSvg() {
  *           Fixing this likely requires parsing .text() for newlines,
  *           converting between these and <tspan> objects
  *     * [ ] We don't handle the z-order of items at all
- *     * [ ] Zoomed mouse cursor position doesn't match up. This might be
- *           that draggy.js doesn't handle zoom well?!
  *
  */
