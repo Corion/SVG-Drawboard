@@ -61,6 +61,7 @@ uplink.onmessage = (event) => {
             };
         } else if( "delete" === msg.action ) {
             deleteItems(svg, [msg.info.id], false);
+
         } else if( "mouseposition" === msg.action ) {
             // makeUser();
             if( ! users[ msg.info.uid ]) {
@@ -280,6 +281,7 @@ document.onwheel = function(e) {
     };
     // Otherwise, handle it as default
 }
+
 function deleteItems(svg,items,local) {
     let oldOverlay = SVG.get("overlay");
     let containedId;
@@ -759,7 +761,7 @@ function exportAsSvg() {
  *     Implement (server-side) images
  *     Implement note color (using <input type="color> preferrably)
  *     Implement touch support for handles
- *     Implement touch support for moving (separate move handle)
+ *     Implement touch support for moving an element (separate move handle)
  *     Implement support for rotation
  *     Implement tool modes
  *     Implement note creation tool
@@ -777,6 +779,7 @@ function exportAsSvg() {
  *     Update the minimap viewbox whenever the used document range of the
  *       document changes
  *     Update the minimap with the currently displayed client range
+ *     Don't pan the minimap
  *     The UI should remain fixed (on the SVG board) while panning
  *     Scale the client cursors inverse to our zoom
  *     Separate the board-URL from the boardname
