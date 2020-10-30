@@ -83,11 +83,11 @@ sub notify_listeners($roomname, $id, $message) {
 
     # First, store the message locally, for later replay
     # and consolidation of the document
-    $dbh->do(<<~SQL, {}, $roomname, $message->{info}->{id}, $message->{action}, $str);
+    $dbh->do(<<SQL, {}, $roomname, $message->{info}->{id}, $message->{action}, $str);
         insert into drawboard_items
                (drawboard,item,action,properties)
         values (?,?,?,?)
-    SQL
+SQL
 
     # Then, broadcast it to the room:
     my $board = fetch_board($roomname);
@@ -168,7 +168,7 @@ websocket '/uplink' => sub($c) {
             #$sth->execute($boardname);
             #warn DBIx::RunSQL->format_results(sth => $sth);
 
-            my $items = $dbh->selectall_arrayref(<<~SQL, { Slice => {}}, $boardname);
+            my $items = $dbh->selectall_arrayref(<<SQL, { Slice => {}}, $boardname);
                 with drawboard_state as (
                     select drawboard
                          , item
@@ -184,7 +184,7 @@ websocket '/uplink' => sub($c) {
                   where pos = 1
                     and action not in ('delete')
                  order by timestamp
-            SQL
+SQL
 
             # Assign the user a name and an uid
             $users{ $id } = {
