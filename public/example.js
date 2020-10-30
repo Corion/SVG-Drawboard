@@ -742,8 +742,6 @@ function exportAsSvg() {
 // Notes (text-rectangles) (and all other svg-objects) in one array
 // Data for transfer:
 // Create X
-// Move X from a to b by (dX, dY)
-// Change attribute Y (other than position) on X
 // Change node type (=Template)
 // How will we handle connectors/arrows?
 // How will we handle templates? Handlebars?
