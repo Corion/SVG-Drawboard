@@ -2,15 +2,30 @@
 use Mojolicious::Lite -signatures;
 use Mojolicious::Sessions;
 use Mojolicious::Static;
-use Mojo::File;
+use Mojo::File 'curfile', 'path';
 use Mojo::JSON 'decode_json', 'encode_json';
 use DBI;
 use DBD::SQLite;
 use DBIx::RunSQL;
 
-# in-memory DB, for now
+my ($configfile) = grep { warn $_; -f $_ } map { path("$_/drawboard.conf")->realpath } '.', curfile->dirname;
+warn "Config: $configfile";
+plugin 'NotYAMLConfig' => { file => $configfile };
+
+# in-memory DB, by default
+app->config->{dsn} ||= 'dbi:SQLite:dbname=:memory:';
+
 warn "Setting up DB";
-my $dbh = DBIx::RunSQL->create(sql => './sql/create.sql', dsn => 'dbi:SQLite:dbname=:memory:');
+# Maybe load this from the config as well?
+my $dbh = DBI->connect(app->config->{dsn}, undef, undef, {RaiseError => 1});
+my $exists = eval {
+    $dbh->do('select * from drawboard_items where 1=0');
+    1
+};
+if( ! $exists) {
+    DBIx::RunSQL->create(sql => './sql/create.sql', dbh => $dbh);
+};
+
 #my $sessions = Mojolicious::Sessions->new;
 #$sessions->cookie_name('drawboard');
 #$sessions->default_expiration(86400);

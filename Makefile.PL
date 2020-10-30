@@ -47,15 +47,16 @@ my %module = (
     },
 
     PREREQ_PM => {
-        'Exporter'              => 5, # for 'import'
-        'Mojolicious'           => 8, # for signatures support
-        'Mojolicious::Sessions' => 0,
-        'Mojolicious::Static'   => 0,
-        'Mojo::File'            => 0,
-        'Mojo::JSON'            => 0,
-        'DBI'                   => 0,
-        'DBD::SQLite'           => 0,
-        'DBIx::RunSQL'          => 0,
+        'Exporter'                           => 5, # for 'import'
+        'Mojolicious'                        => 8, # for signatures support
+        'Mojolicious::Plugin::NotYAMLConfig' => 8,
+        'Mojolicious::Sessions'              => 0,
+        'Mojolicious::Static'                => 0,
+        'Mojo::File'                         => 0,
+        'Mojo::JSON'                         => 0,
+        'DBI'                                => 0,
+        'DBD::SQLite'                        => 0,
+        'DBIx::RunSQL'                       => 0,
     },
     TEST_REQUIRES => {
         'Test::More'   => 0,
