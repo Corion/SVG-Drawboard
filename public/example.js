@@ -20,6 +20,9 @@ let ws_uri = 'ws' + parts[1] + "://" + parts[2] + '../uplink';
 console.log("Connecting to " + ws_uri);
 let uplink = new WebSocket(ws_uri);
 let boardname = parts[3];
+let documentInfo = {
+    dimensions: new SVG.Box(0,0,1,1),
+};
 
 uplink.onopen = (event) => {
     uplink.send(JSON.stringify({
@@ -266,7 +269,6 @@ document.onwheel = function(e) {
         let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
         b.x -= (documentLoc.x * (scale-1));
         b.y -= (documentLoc.y * (scale-1));
-        console.log(b.w);
         svg.viewbox(b);
 
         let oldOverlay = SVG.get("overlay");
@@ -299,6 +301,21 @@ function deleteItems(svg,items,local) {
             };
         };
     };
+}
+*/
+
+// Go through all notes (or all SVG elements?) and update our bounding box
+function recalculateDocumentDimensions(svg) {
+    let res;
+
+    for( let child of svg.children()) {
+        if( ! res ) {
+            res = child.bbox();
+        } else {
+            res = res.merge( child.bbox());
+        }
+    }
+    return res
 }
 
 function deleteCurrentSelection(svg) {
