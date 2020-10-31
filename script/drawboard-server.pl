@@ -249,6 +249,7 @@ SQL
                 # do we really want to do this patching all the time or
                 # just once upon connection of users in a config broadcast?
                 $msg->{info}->{usercolor} = $users{ $id }->{usercolor};
+                $msg->{info}->{username}  = $users{ $id }->{username};
                 $msg->{info}->{uid} = $id;
             };
 

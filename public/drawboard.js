@@ -1,4 +1,4 @@
-"use strict;";
+"use strict";
 
 let svg;
 // Set by the "config" message, below
@@ -71,34 +71,22 @@ function onMessage(event) {
             deleteItems(svg, [msg.info.id], false);
 
         } else if( "mouseposition" === msg.action ) {
-            // makeUser();
-            if( ! users[ msg.info.uid ]) {
-                let g = svg.group();
-                let username = svg.text(msg.user).fill(msg.info.usercolor);
-                username.move(16,0);
-                g.add( svg.circle(8).fill(msg.info.usercolor));
-                g.add( username );
-
-                users[ msg.info.uid ] = {
-                    pointer: g,
-                    animation: undefined,
-                    // should set colour as well
-                };
-            };
+            let user = makeUser(svg, msg.info);
             // Animate instead of teleporting?!
-            if( users[ msg.info.uid ].animation ) {
-                users[ msg.info.uid ].animation.finish();
+            if( user.animation ) {
+                user.animation.finish();
             };
             // Make cursor topmost
-            users[ msg.info.uid ].animation
-                = users[ msg.info.uid ].pointer.animate(10).center( msg.info.x, msg.info.y );
+            let scale = 1/svg.viewbox().zoom;
+            //user.animation
+            //    = user.pointer.animate(10).move( msg.info.x, msg.info.y );
+            user.pointer.scale(scale);
+            user.pointer.x(msg.info.x);
+            user.pointer.y(msg.info.y);
 
         } else if( "disconnect" === msg.action ) {
-            // makeUser();
-            if( users[ msg.info.uid ]) {
-                users[ msg.info.uid ].pointer.remove();
-                delete users[ msg.info.uid ];
-            };
+            console.log("Delete user", msg);
+            deleteUser( svg, msg.info );
 
         } else if( "config" === msg.action ) {
             updateConfig(msg.info);
@@ -564,6 +552,32 @@ function getNoteInfo( note ) {
     };
 }
 
+// Creates or replaces a user mouse pointer
+function makeUser(svg, info ) {
+    if( ! users[ info.uid ]) {
+        let g = svg.group();
+        let svgUsername = svg.text((t) => { t.tspan(info.username) });
+        svgUsername.fill(info.usercolor);
+        svgUsername.move(16,0);
+        g.add( svg.circle(8).fill(info.usercolor));
+        g.add( svgUsername );
+
+        users[ info.uid ] = {
+            pointer: g,
+            animation: undefined,
+            color: info.usercolor,
+        };
+    };
+    return users[ info.uid ];
+}
+
+function deleteUser( svg, info ) {
+    if( users[ info.uid ]) {
+        users[ info.uid ].pointer.remove();
+        delete users[ info.uid ];
+    };
+}
+
 // Creates or replaces a note
 function makeNote(svg, attrs) {
     let t = svg.text((t) => {
@@ -773,7 +787,6 @@ function exportAsSvg() {
  *     Update the minimap with the currently displayed client range
  *     Don't pan the minimap
  *     The UI should remain fixed (on the SVG board) while panning
- *     Scale the client cursors inverse to our zoom
  *     Separate the board-URL from the boardname
  *     Reconnect the websocket upon disconnect - how will we synch up then?
  *         a) Transfer the current server state, losing all local edits
