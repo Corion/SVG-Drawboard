@@ -94,6 +94,38 @@ get '/board/:name' => sub($c) {
     $c->reply->static('./canvas.html');
 };
 
+sub listener_disconnected( $recipient_id ) {
+    warn "Disconnected $recipient_id";
+    delete $connections{ $recipient_id };
+    if( my $user = delete $users{ $recipient_id }) {
+        my $msg = {
+            action => 'disconnect',
+            uid => $recipient_id,
+            username => $user->{username},
+            boardname => $user->{boardname},
+            info => {
+                %{$user},
+            },
+        };
+        for my $board (values %rooms) {
+            delete $board->{listeners}->{$recipient_id};
+        };
+        notify_listeners($user->{boardname}, $recipient_id, $msg)
+    };
+}
+
+sub do_notify_listener($recipient_id,$str) {
+    my $ok = eval {
+        # XXX fixme: Blindly forwarding messages is not nice
+        $connections{$recipient_id}->send($str);
+        1;
+    };
+    if( ! $ok ) {
+        warn "Client error: $@";
+        listener_disconnected($recipient_id);
+    };
+}
+
 # We should sanitize $msg here
 sub notify_listeners($roomname, $id, $message) {
     my $str = encode_json($message);
@@ -110,36 +142,16 @@ SQL
     my $board = fetch_board($roomname);
     for my $l (keys %{ $board->{listeners} }) {
         next if $l eq $id;
+        warn "User '$id' $message->{action} to $l";
 
-        #warn "Sending to $id";
-        #warn "Connected clients are ", join ",", sort keys %connections;
-
-        my $ok = eval {
-            # XXX fixme: Blindly forwarding messages is not nice
-            $connections{$l}->send($str);
-            1;
-        };
-        if( ! $ok ) {
-            warn "Client error: $@";
-            delete $connections{$l};
-            delete $board->{listeners}->{$l};
-        };
+        do_notify_listener($l,$str);
     };
 };
 
 sub notify_listener($recipient, $message) {
-    use Data::Dumper; warn Dumper $message;
     my $str = encode_json($message);
 
-    my $ok = eval {
-            # XXX fixme: Blindly forwarding messages is not nice
-        $connections{$recipient}->send($str);
-        1;
-    };
-    if( ! $ok ) {
-        warn "Client error: $@";
-        delete $connections{$recipient};
-    };
+    do_notify_listener($recipient,$str);
 };
 
 # Stuff that we might not want to store in the DB, or purge more quickly
@@ -245,22 +257,9 @@ SQL
     });
 
     $c->on(finish => sub(@foo) {
-        warn "Disconnected $id";
         my( $c ) = @foo;
 
-        delete $connections{ $id };
-        if( my $user = delete $users{ $id }) {
-            my $msg = {
-                action => 'disconnect',
-                uid => $id,
-                username => $user->{username},
-                boardname => $user->{boardname},
-                info => {
-                    %{$user},
-                },
-            };
-            notify_listeners($user->{boardname}, $id, $msg)
-        };
+        listener_disconnected($id);
     });
 };
 
