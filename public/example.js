@@ -35,7 +35,7 @@ uplink.onopen = (event) => {
 let users = {};
 
 uplink.onmessage = (event) => {
-    console.log(event.data);
+    //console.log(event.data);
     let msg;
     try {
         msg = JSON.parse(event.data);
@@ -45,6 +45,7 @@ uplink.onmessage = (event) => {
     };
 
     if( msg.boardname == boardname ) {
+        // console.log(msg.action);
         if( /^(dragend|dragmove|textedit)$/.test(msg.action)) {
             // Last edit wins
             // We need to handle the user selection
@@ -59,6 +60,7 @@ uplink.onmessage = (event) => {
             if( moveOverlay ) {
                 addSelectionOverlay(svg, msg.info.id);
             };
+
         } else if( "delete" === msg.action ) {
             deleteItems(svg, [msg.info.id], false);
 
@@ -130,7 +132,7 @@ function mkThrottledBroadcaster(delay,keycols) {
                     info.latestMsg = undefined;
                 };
                 info.timerId = undefined;
-            }, 100);
+            }, delay);
         };
     }
 };
@@ -147,7 +149,7 @@ function broadcastClientCursor(x,y) {
     });
 }
 
-let throttledBroadcastNoteState = mkThrottledBroadcaster(1,["id"]);
+let throttledBroadcastNoteState = mkThrottledBroadcaster(100,["id"]);
 function broadcastNoteState(noteInfo,eventname) {
     // Debounce this just like client cursors, except keyed on the note id
     // as well.
@@ -582,13 +584,11 @@ function makeNote(svg, attrs) {
     });
 
     g.draggy().on("dragend", (event) => {
-        //console.log("End",event);
         addSelectionOverlay(svg, event.target.instance.attr('id'));
         let nodeInfo = getNoteInfo(event.target.instance);
         broadcastNoteState(nodeInfo,'dragend');
     });
     g.draggy().on("dragmove", (event) => {
-        // console.log("Move",event);
         addSelectionOverlay(svg, event.target.instance.attr('id'));
         let nodeInfo = getNoteInfo(event.target.instance);
         broadcastNoteState(nodeInfo,'dragend');
