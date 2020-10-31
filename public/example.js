@@ -319,12 +319,23 @@ function recalculateDocumentDimensions(svg) {
     return res
 }
 
-function deleteCurrentSelection(svg) {
+function deleteCurrentSelection() {
     let oldOverlay = SVG.get("overlay");
     if( oldOverlay ) {
         let containedId = oldOverlay.data("overlaid");
         deleteItems(svg, [ containedId ], true);
         oldOverlay.remove();
+    };
+}
+
+function colorCurrentSelection() {
+    let overlay = SVG.get("overlay");
+    if( overlay ) {
+        let containedId = overlay.data("overlaid");
+        let item = SVG.get(containedId);
+        let noteInfo = getNoteInfo(item);
+        noteInfo.color = config.usercolor;
+        updateNote(svg,containedId, noteInfo);
     };
 }
 
@@ -515,48 +526,16 @@ function addSelectionOverlay(svg,singleItem) {
     ne.on("dragmove",dragmove_corner);
     se.on("dragmove",dragmove_corner);
 
-    // XXX the toolbar should have a fixed size, irrespective of zoom
-    //     while the items should resize with the zoom. We should do this by
-    //     creating the toolbar as a subdocument, and then resizing the whole
-    //     subdocument inverse to the zoom, instead of resizing the individual
-    //     elements. Or maybe have the toolbar as HTML, outside of the SVG...
-    // Add the toolbar, above the (single) selected item
-    // Later, make the toolbar items dynamic
-
     // Scale the toolbar inverse to our zoom, so the size in pixels remains
-    // constant
-    // Consider using a HTML foreignobject to prevent the inner elements from scaling
-    // with the SVG document. This means that the UI won't show up in the
-    // minimap as well.
-    let scaleM = new SVG.Matrix(scale,0,0,scale,0,0);
-    let selectionBB = overlay.bbox();
-    let toolbar = svg.group();
-    let toolbarSize = new SVG.Box(0,0,128,48).transform(scaleM);
-    let toolbarBG = svg.rect(toolbarSize.w, toolbarSize.h).fill('#fff').stroke('#444').attr({ "stroke-width": 1*scale });
     let obb = overlay.bbox(); // Adjust for sides of the viewbox, later
-    toolbarBG.center(overlay.cx(), obb.y - toolbarBG.cy() - 8*scale);
-    toolbar.add(toolbarBG);
+    let toolbar = svg.use("toolbar");
+    let tbb = toolbar.bbox();
     overlay.add(toolbar);
-
-    // Color chooser
-    let icon = svg.group();
-    let iconColor = svg.circle(32*scale).fill(config.usercolor).stroke('#444').attr({ "stroke-width": 1*scale });
-    iconColor.center( toolbarBG.x() + 24*scale, toolbarBG.y()+toolbarBG.height()/2 );
-    let triangle = svg.polygon('8,8 8,0 0,8').fill('black');
-    let irb = iconColor.rbox();
-    let ibb = iconColor.bbox();
-    triangle.transform(new SVG.Matrix(scale,0,0,scale,iconColor.x()+iconColor.width()-8*scale,iconColor.y()+iconColor.height()-8*scale));
-
-    icon.add(iconColor);
-    icon.add(triangle);
-    toolbar.add(icon);
-    icon.node.onclick = (e) => {
-        console.log("Changing color");
-        let item = SVG.get(singleItem);
-        let noteInfo = getNoteInfo(item);
-        noteInfo.color = config.usercolor;
-        updateNote(svg,singleItem, noteInfo);
-    };
+    toolbar.cx(obb.x + (obb.width-tbb.width) / 2);
+    toolbar.y(obb.y - tbb.height - 8*scale);
+    toolbar.scale(scale);
+    let icon = svg.select( ".currentcolor", toolbar).first();
+    icon.fill(config.usercolor);
 
     return overlay
 }
@@ -635,7 +614,7 @@ function makeNote(svg, attrs) {
 }
 
 function updateNote(svg, note, attrs) {
-    console.log("Switched out of text editing", event.target);
+    // console.log("Switched out of text editing", event.target);
     console.log("Updating note with", attrs);
     let newNote = makeNote( svg, attrs );
     broadcastNoteState(getNoteInfo(newNote),'textedit');
@@ -682,6 +661,11 @@ function startTextEditing( event ) {
                     let bb = SVG.select('.main', editedNode.node).first().bbox();
                     let info = getNoteInfo(editedNode);
                     info.text = textdiv.textContent;
+
+                    // Now, find the lines in the content, and have them as TSPAN
+                    // Insert the text word-by-word into a (hidden, otherwise identical)
+                    // div and whenever the .height changes, create a new TSPAN.
+
                     updateNote(svg, editedNode, info);
                     state_editedNode = undefined;
                     svg.off("click");

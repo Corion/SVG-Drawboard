@@ -70,6 +70,14 @@ function setupGraph() {
     <filter id="shadow" x="-20%" y="-20%" width="200%" height="200%">
       <feDropShadow dx="1" dy="1" stdDeviation="5" flood-color="#505050" />
     </filter>
+
+    <g id="toolbar">
+        <!-- border, maybe resize that one dynamically?! -->
+        <rect id="SvgjsRect1081" width="128" height="48" fill="#ffffff" stroke="#444444" stroke-width="1"></rect>
+        <!-- color chooser -->
+        <g class="colorChooser" onclick="javascript:colorCurrentSelection()" ><circle id="SvgjsCircle1083" class="currentcolor" r="16" cx="24" cy="24" fill="#6600ff" stroke="#444444" stroke-width="1"></circle><polygon id="SvgjsPolygon1084" points="8,8 8,0 0,8" fill="black" transform="matrix(1,0,0,1,32,32)"></polygon></g>
+    </g>
+
     </defs>
 </svg>
 <div id="thumbview">
