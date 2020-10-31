@@ -1,40 +1,46 @@
-"use strict";
+"use strict;";
 
-var svg = SVG('svg1').size("100%", 900);
-var links = svg.group();
-var markers = svg.group();
-var defs = svg.defs();
-
+let svg;
 // Set by the "config" message, below
 let config = {};
-
-let loc = window.location;
-let href = loc.href;
-
-let parts = href.match(/^http(s?):\/\/(.*\/)([\w\.-]+)$/);
-if(! parts) {
-    console.log("Don't understand the URL '"+href+"'");
-};
-
-let ws_uri = 'ws' + parts[1] + "://" + parts[2] + '../uplink';
-console.log("Connecting to " + ws_uri);
-let uplink = new WebSocket(ws_uri);
-let boardname = parts[3];
-let documentInfo = {
-    dimensions: new SVG.Box(0,0,1,1),
-};
-
-uplink.onopen = (event) => {
-    uplink.send(JSON.stringify({
-        'action': 'subscribe',
-        'boardname': boardname,
-    }));
-    console.log("Connected, subscribing");
-};
-
 let users = {};
+let uplink;
+let boardname;
+let documentInfo;
 
-uplink.onmessage = (event) => {
+function initDrawboard(svgId) {
+    svg = SVG(svgId).size("100%", 900);
+    //var links = svg.group();
+    //var markers = svg.group();
+    //var defs = svg.defs();
+
+    let loc = window.location;
+    let href = loc.href;
+
+    let parts = href.match(/^http(s?):\/\/(.*\/)([\w\.-]+)$/);
+    if(! parts) {
+        console.log("Don't understand the URL '"+href+"'");
+    };
+
+    let ws_uri = 'ws' + parts[1] + "://" + parts[2] + '../uplink';
+    console.log("Connecting to " + ws_uri);
+    uplink = new WebSocket(ws_uri);
+    boardname = parts[3];
+    documentInfo = {
+        dimensions: new SVG.Box(0,0,1,1),
+    };
+
+    uplink.onmessage = onMessage
+    uplink.onopen = (event) => {
+        uplink.send(JSON.stringify({
+            'action': 'subscribe',
+            'boardname': boardname,
+        }));
+        console.log("Connected, subscribing");
+    };
+};
+
+function onMessage(event) {
     //console.log(event.data);
     let msg;
     try {
@@ -98,7 +104,7 @@ uplink.onmessage = (event) => {
             updateConfig(msg.info);
         };
     };
-};
+}
 
 function updateConfig(aConfig) {
     config = aConfig;

@@ -9,6 +9,7 @@
 <script type="text/javascript" src="../vendor/handlebars-v4.7.6.js"></script>
 <script type="text/javascript" src="vendor/morphdom.js"></script>
 -->
+<script type="text/javascript" src="../drawboard.js"></script>
 <script>
 let state = {
     nodes: [
@@ -63,7 +64,7 @@ function setupGraph() {
 
 </style>
 </head>
-<body onload="javascript:setupGraph()">
+<body onload="javascript:initDrawboard('svg1')">
 <div class="navigation"><nav><a href="../">Home</a></nav></div>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg1">
     <defs>
@@ -87,7 +88,6 @@ function setupGraph() {
         <use xlink:href="#svg1" />
     </svg>
 </div>
-<script type="text/javascript" src="../drawboard.js"></script>
 <button onclick="javascript:exportAsSvg()" href="#">Save</button>
 <button onclick="javascript:createNote()" href="#">Note</button>
 <a href="https://github.com/corion/SVG-Drawboard">Github</a>
