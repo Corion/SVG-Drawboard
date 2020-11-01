@@ -766,7 +766,6 @@ function exportAsSvg() {
  *     Implement rendering of multiple <TSPAN> lines properly
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
- *     Implement rate limiting of identical message types (type+id, maximum 10/s)
  *     Implement moving notes to back/front
  *     Implement layers, or at least a background layer
  *         We'll need at least two editing layers:
