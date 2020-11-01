@@ -849,7 +849,7 @@ function exportAsSvg() {
  *     Implement tool modes beyond "select" and "create"
  *     Implement touch support for rotating (separate rotation handle)
  *     Implement download of the SVG, and download of a JSON describing the SVG
- *     Implement replay/reupload of the SVG frin the JSON describing the SVG
+ *     Implement replay/reupload of the SVG from the JSON describing the SVG
  *     Implement upload of random SVGs (?)
  *     Create item from template
  *     Implement "join as guest" gateway page that asks for username and password
