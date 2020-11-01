@@ -785,6 +785,7 @@ function exportAsSvg() {
  *         Notes etc.
  *         Background (only selectable in a special mode)
  *     Implement defined zones where you can one-click to move/zoom to
+ *     Implement (note) context menus
  *     Implement (inline) images
  *     Implement command line client for creating notes
  *     Implement command line client for uploading images
