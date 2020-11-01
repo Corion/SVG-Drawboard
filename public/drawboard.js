@@ -209,6 +209,16 @@ function selectTool(tool) {
     };
 }
 
+function svgUsedRange(svg) {
+    let bbox = new SVG.BBox();
+    let children = svg.children();
+    let el;
+    children.forEach( (el) =>{
+        bbox = bbox.merge( el.bbox() );
+    });
+    return bbox;
+}
+
 // Set up the thumbview command(s)
 function setupMinimap(id) {
     let DOMminimap = document.getElementById(id);
