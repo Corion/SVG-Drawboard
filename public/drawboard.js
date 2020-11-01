@@ -617,7 +617,7 @@ function makeNote(svg, attrs) {
     g.draggy().on("dragmove", (event) => {
         addSelectionOverlay(svg, event.target.instance.attr('id'));
         let nodeInfo = getNoteInfo(event.target.instance);
-        broadcastNoteState(nodeInfo,'dragend');
+        broadcastNoteState(nodeInfo,'dragmove');
     });
 
     if( attrs.id ) {
@@ -678,8 +678,6 @@ function startTextEditing( event ) {
         // newly added element, and if so, deletes the element
         svg.off("click"); // Do we really want to wipe all existing listeners?!
         svg.on("click", (event) => {
-            // find x,y coordinate, and check if the location is contained
-            // in myforeign
             console.log("Click on", event);
 
             if( state_editedNode ) {
