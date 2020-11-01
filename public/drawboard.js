@@ -274,7 +274,6 @@ document.onmousemove = (e) => {
         // Convert from clientX/clientY to position in SVG
         let pt = new SVG.Point(e.clientX, e.clientY);
         let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
-        broadcastClientCursor(documentLoc.x, documentLoc.y);
 
         if (isPanning){
             let vb = panStartViewbox;
@@ -283,6 +282,8 @@ document.onmousemove = (e) => {
             let movedViewBox = {x:vb.x+dx,y:vb.y+dy,width:vb.width,height:vb.height};
             svg.viewbox(movedViewBox.x,movedViewBox.y,movedViewBox.width,movedViewBox.height);
             // broadcastClientViewbox
+        } else {
+            broadcastClientCursor(documentLoc.x, documentLoc.y);
         };
     };
 };
