@@ -832,7 +832,8 @@ function exportAsSvg() {
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
  *     Implement moving notes to back/front
- *     Implement layers, or at least a background layer
+ *     Implement (local) undo
+ *     Implement editing layers, or at least a background layer
  *         We'll need at least two editing layers:
  *         Notes etc.
  *         Background (only selectable in a special mode)
