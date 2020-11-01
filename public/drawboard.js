@@ -37,6 +37,7 @@ function initDrawboard(svgId) {
             'boardname': boardname,
         }));
         console.log("Connected, subscribing");
+        selectTool("selector");
     };
 };
 
@@ -164,22 +165,35 @@ var template = {
 };
 */
 
+let modeTool;
 function selectTool(tool) {
     let callback;
     let cursor;
+    modeTool = tool;
     switch (tool) {
         case "selector":
-            callback = (e) => {
-                /* reset cursor */
-            };
-            /* cursor = ...; */
+            svg.node.style.setProperty('cursor','default');
+            callback = undefined;
             break;
+
         case "makeNote":
+            svg.node.style.setProperty('cursor','crosshair');
             callback = (e) => {
+                let pt = new SVG.Point(e.clientX, e.clientY);
+                let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
+                let note = makeNote(svg, {
+                    x : documentLoc.x,
+                    y : documentLoc.y,
+                    width : 100,
+                    height : 100,
+                    text: "enter text",
+                });
+                addSelectionOverlay(svg,note.attr('id'));
+                // XXX directly enter text entry mode?
+
                 /* reset cursor */
                 selectTool("selector");
             };
-            /* cursor = ...; */
             break;
     }
 
@@ -188,11 +202,8 @@ function selectTool(tool) {
     } else {
         // Can we always switch off the callback? This conflicts with
         // the normal selection ...
-        svg.off("click", callback);
+        svg.off("click");
     };
-    /* set cursor too */
-
-
 }
 
 // Hotkeys
@@ -201,15 +212,19 @@ document.onkeydown = (e) => {
     // use e.keyCode
     console.log(e.keyCode);
 
-    switch(e.keyCode) {
-        // "N" - makeNote
-        // "B" - showNavigationPane
-        // "<space>" - (while held down) selectPanTool
+    if( "selector" === modeTool ) {
+        switch(e.keyCode) {
+            case 78: // "N" - makeNote
+                     selectTool("makeNote");
+                     break;
+            // "B" - showNavigationPane
+            // "<space>" - (while held down) selectPanTool
 
-        case 46: // del
-                 deleteCurrentSelection();
-                 break;
+            case 46: // del
+                    deleteCurrentSelection();
+                    break;
 
+        };
     };
 
     //console.log(e.keyCode);
@@ -778,8 +793,7 @@ function exportAsSvg() {
  *     Implement touch support for handles
  *     Implement touch support for moving an element (separate move handle)
  *     Implement support for rotation
- *     Implement tool modes
- *     Implement note creation tool
+ *     Implement tool modes beyond "select" and "create"
  *     Implement touch support for rotating (separate rotation handle)
  *     Implement download of the SVG, and download of a JSON describing the SVG
  *     Implement replay/reupload of the SVG frin the JSON describing the SVG

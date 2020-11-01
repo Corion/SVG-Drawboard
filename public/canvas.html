@@ -65,7 +65,10 @@ function setupGraph() {
 </style>
 </head>
 <body onload="javascript:initDrawboard('svg1')">
-<div class="navigation"><nav><a href="../">Home</a></nav></div>
+<div class="navigation"><nav><a href="../">Home</a></nav>
+<button onclick="javascript:selectTool('makeNote')" href="#">New note</button>
+<button onclick="javascript:exportAsSvg()" href="#">Download</button>
+</div>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg1">
     <defs>
     <filter id="shadow" x="-20%" y="-20%" width="200%" height="200%">
@@ -94,8 +97,6 @@ function setupGraph() {
         <use xlink:href="#svg1" />
     </svg>
 </div>
-<button onclick="javascript:exportAsSvg()" href="#">Save</button>
-<button onclick="javascript:createNote()" href="#">Note</button>
 <a href="https://github.com/corion/SVG-Drawboard">Github</a>
 </body>
 </html>
