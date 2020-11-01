@@ -655,26 +655,36 @@ function makeNote(svg, attrs) {
     g.move(attrs.x, attrs.y);
 
     t.on('click', startTextEditing);
-    g.on('mousedown', (event) => {
-        // console.log("Selected single group");
+
+    g.on("mousedown", (event) => {
+        // We only want to select with the (primary) mouse button
         if( event.which === 1 ) {
             let overlay = addSelectionOverlay(svg, g.attr('id'));
         };
     });
 
-    g.draggy().on("dragend", (event) => {
-        if( event.which === 1 ) {
-            addSelectionOverlay(svg, event.target.instance.attr('id'));
-        };
-        let nodeInfo = getNoteInfo(event.target.instance);
-        broadcastNoteState(nodeInfo,'dragend');
+    g.draggy();
+    g.beforedrag = (e) => {
+        // We only want to drag with the (primary) mouse button
+        return e.which === 1
+    };
+    let dragging;
+    g.on("dragstart", (event) => {
+        dragging = true;
     });
-    g.draggy().on("dragmove", (event) => {
-        if( event.which === 1 ) {
+    g.on("dragend", (event) => {
+        if( dragging ) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
+            let nodeInfo = getNoteInfo(event.target.instance);
+            broadcastNoteState(nodeInfo,'dragend');
         };
-        let nodeInfo = getNoteInfo(event.target.instance);
-        broadcastNoteState(nodeInfo,'dragmove');
+    });
+    g.on("dragmove", (event) => {
+        if( dragging ) {
+            addSelectionOverlay(svg, event.target.instance.attr('id'));
+            let nodeInfo = getNoteInfo(event.target.instance);
+            broadcastNoteState(nodeInfo,'dragmove');
+        };
     });
 
     if( attrs.id ) {
@@ -869,6 +879,5 @@ function exportAsSvg() {
  *           Fixing this likely requires parsing .text() for newlines,
  *           converting between these and <tspan> objects
  *     * [ ] We don't handle rearranging the z-order of items at all
- *     * [ ] Dragging items doesn't care about what mouse button was used
  *
  */

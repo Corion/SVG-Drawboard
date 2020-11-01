@@ -35,7 +35,10 @@
 
                 // Invoke any callbacks
                 if (element.beforedrag) {
-                    element.beforedrag(event);
+                    if( !element.beforedrag(event)) {
+                        // If .beforedrag returns false, don't do anything
+                        return;
+                    };
                 }
 
                 // Get element bounding box
