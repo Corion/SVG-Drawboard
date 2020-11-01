@@ -37,7 +37,10 @@ function initDrawboard(svgId) {
             'boardname': boardname,
         }));
         console.log("Connected, subscribing");
+
+        // Connect up the rest of the UI
         selectTool("selector");
+        setupMinimap("thumbview");
     };
 };
 
@@ -205,6 +208,29 @@ function selectTool(tool) {
         svg.off("click");
     };
 }
+
+// Set up the thumbview command(s)
+function setupMinimap(id) {
+    let DOMminimap = document.getElementById(id);
+    let minimap = new SVG(id);
+    DOMminimap.onclick = (e) => {
+        let pt = new SVG.Point(e.clientX, e.clientY);
+        let documentLoc = pt.transform(new SVG.Matrix(minimap.node.getScreenCTM().inverse()));
+
+        // Move the main view accordingly
+        // XXX We really want to move the center of the viewbox, not the top
+        //     left corner, I guess
+        let vb = svg.viewbox();
+        let mb = minimap.viewbox();
+
+        // Scale the click position from the minimap to the viewbox
+
+        let movedViewBox = {x:documentLoc.x,y:documentLoc.y,width:vb.width,height:vb.height};
+        svg.viewbox(movedViewBox.x,movedViewBox.y,movedViewBox.width,movedViewBox.height);
+
+        // Broadcast our new viewbox
+    };
+};
 
 // Hotkeys
 document.onkeydown = (e) => {
