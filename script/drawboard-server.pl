@@ -42,6 +42,9 @@ our @usercolors = (
     '#ff6600',
     '#6600ff',
     '#00ff66',
+    '#ffee66',
+    '#ee66ff',
+    '#66ffee',
 );
 
 
