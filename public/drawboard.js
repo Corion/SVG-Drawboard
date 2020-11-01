@@ -832,7 +832,7 @@ function exportAsSvg() {
  *     * [ ] We can't handle multiline text when editing
  *           Fixing this likely requires parsing .text() for newlines,
  *           converting between these and <tspan> objects
- *     * [ ] We don't handle the z-order of items at all
+ *     * [ ] We don't handle rearranging the z-order of items at all
  *     * [ ] Dragging items doesn't care about what mouse button was used
  *
  */
