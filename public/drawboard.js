@@ -833,5 +833,6 @@ function exportAsSvg() {
  *           Fixing this likely requires parsing .text() for newlines,
  *           converting between these and <tspan> objects
  *     * [ ] We don't handle the z-order of items at all
+ *     * [ ] Dragging items doesn't care about what mouse button was used
  *
  */
