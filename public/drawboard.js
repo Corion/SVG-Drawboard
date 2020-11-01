@@ -621,16 +621,22 @@ function makeNote(svg, attrs) {
     t.on('click', startTextEditing);
     g.on('mousedown', (event) => {
         // console.log("Selected single group");
-        let overlay = addSelectionOverlay(svg, g.attr('id'));
+        if( event.which === 1 ) {
+            let overlay = addSelectionOverlay(svg, g.attr('id'));
+        };
     });
 
     g.draggy().on("dragend", (event) => {
-        addSelectionOverlay(svg, event.target.instance.attr('id'));
+        if( event.which === 1 ) {
+            addSelectionOverlay(svg, event.target.instance.attr('id'));
+        };
         let nodeInfo = getNoteInfo(event.target.instance);
         broadcastNoteState(nodeInfo,'dragend');
     });
     g.draggy().on("dragmove", (event) => {
-        addSelectionOverlay(svg, event.target.instance.attr('id'));
+        if( event.which === 1 ) {
+            addSelectionOverlay(svg, event.target.instance.attr('id'));
+        };
         let nodeInfo = getNoteInfo(event.target.instance);
         broadcastNoteState(nodeInfo,'dragmove');
     });
