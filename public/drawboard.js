@@ -879,5 +879,6 @@ function exportAsSvg() {
  *           Fixing this likely requires parsing .text() for newlines,
  *           converting between these and <tspan> objects
  *     * [ ] We don't handle rearranging the z-order of items at all
+ *     * [ ] Delete key always deletes the note, even in text editing mode
  *
  */
