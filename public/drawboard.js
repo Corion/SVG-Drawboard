@@ -346,7 +346,7 @@ function addSelectionOverlay(svg,singleItem) {
         if( contained ) {
             let pos = new SVG.Matrix(contained);
 
-            oldOverlay.replace(contained);
+            oldOverlay.remove();
 
             // Move the contained object into the correct position
             contained.transform(pos);
@@ -369,7 +369,6 @@ function addSelectionOverlay(svg,singleItem) {
     let overlay = svg.group().attr({"id":"overlay"});
     item.addClass('overlaid');
 
-    overlay.add(item);
     overlay.data("overlaid",item,true); // We want to store an object reference
 
     // Add eight svg.circle() as handles for sizing the selection
@@ -533,6 +532,9 @@ function addSelectionOverlay(svg,singleItem) {
     let icon = svg.select( ".currentcolor", toolbar).first();
     icon.fill(config.usercolor);
 
+    let layer = SVG.get('displayLayerUI');
+    layer.add(overlay);
+
     return overlay
 }
 
@@ -562,6 +564,9 @@ function makeUser(svg, info ) {
         g.add( svg.circle(8).fill(info.usercolor));
         g.add( svgUsername );
 
+        let layer = SVG.get('displayLayerCursors');
+        layer.add(g);
+
         users[ info.uid ] = {
             pointer: g,
             animation: undefined,
@@ -580,6 +585,7 @@ function deleteUser( svg, info ) {
 
 // Creates or replaces a note
 function makeNote(svg, attrs) {
+
     let t = svg.text((t) => {
         t.tspan(attrs.text).attr({"fill":"black","font-weight":"bold"});
     });
@@ -630,6 +636,8 @@ function makeNote(svg, attrs) {
         g.id(config.connection_prefix+"-"+g.id());
     };
 
+    let layer = SVG.get('displayLayerNotes');
+    layer.add(g);
     return g
 }
 
@@ -759,7 +767,11 @@ function exportAsSvg() {
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
  *     Implement rate limiting of identical message types (type+id, maximum 10/s)
+ *     Implement moving notes to back/front
  *     Implement layers, or at least a background layer
+ *         We'll need at least two editing layers:
+ *         Notes etc.
+ *         Background (only selectable in a special mode)
  *     Implement defined zones where you can one-click to move/zoom to
  *     Implement (inline) images
  *     Implement command line client for creating notes
