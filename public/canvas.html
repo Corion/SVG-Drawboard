@@ -10,26 +10,6 @@
 <script type="text/javascript" src="vendor/morphdom.js"></script>
 -->
 <script type="text/javascript" src="../drawboard.js"></script>
-<script>
-let state = {
-    nodes: [
-        // need: createdBy, createdTs, lastChangedBy, lastChangeTs
-        /*
-        { type:"note", id:"id-local-1", x:10,y:10,width:100,height:100,text:"Node 1",title:"Node 1"},
-        { type:"note", id:"id-local-2", x:110,y:10,width:100,height:100,text:"Node 2",title:"Node 2"},
-        { type:"note", id:"id-local-3", x:210,y:10,width:100,height:100,text:"Node 3",title:"Node 3"},
-        */
-    ],
-    joins: [],
-};
-
-function setupGraph() {
-    // let data = JSON.parse(fetch('./nodes'));
-    mkNodes( state.nodes );
-    // mkJoins( nodes, data.joins );
-    //addSelectionOverlay(svg,'id-local-2');
-}
-</script>
 <style>
 .node-vertical__inactive {
   filter:url(#shadow);
