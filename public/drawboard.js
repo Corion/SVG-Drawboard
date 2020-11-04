@@ -178,11 +178,34 @@ let modeTool;
 function selectTool(tool) {
     let callback;
     let cursor;
+
+    // Are we leaving edit mode?
+    if( state_editedNode ) {
+        let editedNode = SVG.get(state_editedNode);
+        if( ! editedNode.node.contains( event.target )) {
+            console.log("Left editing note",state_editedNode);
+            let bb = SVG.select('.main', editedNode.node).first().bbox();
+            let info = getNoteInfo(editedNode);
+            info.text = textdiv.textContent;
+
+            // Now, find the lines in the content, and have them as TSPAN
+            // Insert the text word-by-word into a (hidden, otherwise identical)
+            // div and whenever the .height changes, create a new TSPAN.
+
+            updateNote(svg, editedNode, info);
+            state_editedNode = undefined;
+        };
+    };
+
     modeTool = tool;
     switch (tool) {
         case "selector":
             svg.node.style.setProperty('cursor','default');
-            callback = undefined;
+            callback = (e) => {
+                if( e.target === svg.node ) {
+                    removeSelectionOverlay(svg);
+                };
+            };
             break;
 
         case "makeNote":
@@ -748,37 +771,15 @@ function startTextEditing( event ) {
         textdiv.appendChild(textspan);
         textspan.appendChild(textnode);
 
-        // Install a listener on svg, which checks if we clicked away from our
-        // newly added element, and if so, deletes the element
-        svg.off("click"); // Do we really want to wipe all existing listeners?!
-        svg.on("click", (event) => {
-            console.log("Click on", event);
-
-            if( state_editedNode ) {
-                let editedNode = SVG.get(state_editedNode);
-                if( ! editedNode.node.contains( event.target )) {
-                    console.log("Left editing note",state_editedNode);
-                    let bb = SVG.select('.main', editedNode.node).first().bbox();
-                    let info = getNoteInfo(editedNode);
-                    info.text = textdiv.textContent;
-
-                    // Now, find the lines in the content, and have them as TSPAN
-                    // Insert the text word-by-word into a (hidden, otherwise identical)
-                    // div and whenever the .height changes, create a new TSPAN.
-
-                    updateNote(svg, editedNode, info);
-                    state_editedNode = undefined;
-                    svg.off("click");
-                };
-            };
-        });
-
         // XXX We would like to center on the tspan, or whatever?!
         let transform = new SVG.Matrix(t);
         note.add(myforeign);
         myforeign.transform(transform);
         myforeign.node.appendChild(textdiv);
         state_editedNode = note.attr('id');
+
+        // selectTool() will detect that we left text editing mode
+        // and perform the proper updating
 };
 
 function mkNote(svg,nodeInfo) {
