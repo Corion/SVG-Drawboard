@@ -416,9 +416,7 @@ function colorCurrentSelection() {
     };
 }
 
-function addSelectionOverlay(svg,singleItem) {
-
-    // remove old overlay, if any:
+function removeSelectionOverlay(svg1) {
     let oldOverlay = SVG.get("overlay");
     if( oldOverlay ) {
         let containedId = oldOverlay.data("overlaid");
@@ -438,6 +436,11 @@ function addSelectionOverlay(svg,singleItem) {
             oldOverlay.remove();
         };
     };
+};
+
+function addSelectionOverlay(svg1,singleItem) {
+    // remove old overlay, if any:
+    removeSelectionOverlay(svg1);
 
     let scale = 1/svg.viewbox().zoom;
 
