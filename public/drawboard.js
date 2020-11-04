@@ -9,6 +9,12 @@ let boardname;
 let documentInfo;
 
 function initDrawboard(svgId) {
+    let el;
+    for( el of document.querySelectorAll('.nojs')) {
+        console
+        el.style.visibility = 'hidden';
+    };
+
     svg = SVG(svgId).size("100%", 900);
     //var links = svg.group();
     //var markers = svg.group();
