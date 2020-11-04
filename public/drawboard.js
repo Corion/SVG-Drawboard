@@ -839,6 +839,10 @@ function exportAsSvg() {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
+ *     Separate the main viewbox and the document into two SVG elements
+ *         This allows the minimap to have a secondary view onto the document
+ *         Overlay the UI in the main viewbox, not in the document
+ *         (this means the UI won't show up in the minimap)
  *     Add "loading" animation while initializing
  *     Implement rendering of multiple <TSPAN> lines properly
  *     Implement handling of multiline input into <TSPAN>
