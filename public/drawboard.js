@@ -839,6 +839,7 @@ function exportAsSvg() {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
+ *     Add "loading" animation while initializing
  *     Implement rendering of multiple <TSPAN> lines properly
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
