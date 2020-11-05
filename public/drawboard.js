@@ -174,19 +174,16 @@ var template = {
 };
 */
 
-let modeTool;
-function selectTool(tool) {
-    let callback;
-    let cursor;
-
-    // Are we leaving edit mode?
+function leaveEditingMode() {
     if( state_editedNode ) {
         let editedNode = SVG.get(state_editedNode);
         if( ! editedNode.node.contains( event.target )) {
             console.log("Left editing note",state_editedNode);
             let bb = SVG.select('.main', editedNode.node).first().bbox();
             let info = getNoteInfo(editedNode);
-            info.text = textdiv.textContent;
+            let textdiv = SVG.select('div', state_editedForeign.node).first();
+            info.text = textdiv.node.innerText;
+            state_editedForeign.remove();
 
             // Now, find the lines in the content, and have them as TSPAN
             // Insert the text word-by-word into a (hidden, otherwise identical)
@@ -196,12 +193,22 @@ function selectTool(tool) {
             state_editedNode = undefined;
         };
     };
+}
+
+let modeTool;
+function selectTool(tool) {
+    let callback;
+    let cursor;
+
+    leaveEditingMode();
 
     modeTool = tool;
     switch (tool) {
         case "selector":
             svg.node.style.setProperty('cursor','default');
             callback = (e) => {
+                leaveEditingMode();
+
                 if( e.target === svg.node ) {
                     removeSelectionOverlay(svg);
                 };
@@ -223,13 +230,14 @@ function selectTool(tool) {
                 addSelectionOverlay(svg,note.attr('id'));
                 // XXX directly enter text entry mode?
 
-                /* reset cursor */
+                /* reset cursor and tool */
                 selectTool("selector");
             };
             break;
     }
 
     if( callback ) {
+        svg.off("click");
         svg.on("click", callback);
     } else {
         // Can we always switch off the callback? This conflicts with
@@ -750,7 +758,11 @@ function updateNote(svg, note, attrs) {
 };
 
 let state_editedNode;
+let state_editedForeign;
 function startTextEditing( event ) {
+        // If we were already editing a different object, quit doing that
+        leaveEditingMode();
+
         // move a HTML contenteditable div in place, let the user edit it
         // If there is a click outside, update the text from the div
         console.log("Editing");
@@ -780,6 +792,7 @@ function startTextEditing( event ) {
         myforeign.transform(transform);
         myforeign.node.appendChild(textdiv);
         state_editedNode = note.attr('id');
+        state_editedForeign = myforeign;
 
         // selectTool() will detect that we left text editing mode
         // and perform the proper updating
