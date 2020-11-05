@@ -177,7 +177,7 @@ var template = {
 function leaveEditingMode() {
     if( state_editedNode ) {
         let editedNode = SVG.get(state_editedNode);
-        if( ! editedNode.node.contains( event.target )) {
+        if( editedNode && ! editedNode.node.contains( event.target )) {
             console.log("Left editing note",state_editedNode);
             let bb = SVG.select('.main', editedNode.node).first().bbox();
             let info = getNoteInfo(editedNode);
