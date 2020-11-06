@@ -166,6 +166,9 @@ INSTALL
 [![Travis Build Status](https://travis-ci.org/Corion/$distlink.svg?branch=master)](https://travis-ci.org/Corion/$distlink)
 [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/Corion/$distlink?branch=master&svg=true)](https://ci.appveyor.com/project/Corion/$distlink)
 
+![sticky notes on a whiteboard](screenshots/demo-20201106.png)
+
+
 STATUS
         update_file( 'README.mkdn', $readme_mkdn );
     };
