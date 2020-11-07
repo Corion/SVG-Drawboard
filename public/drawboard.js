@@ -76,6 +76,7 @@ function onMessage(event) {
             if( moveOverlay ) {
                 addSelectionOverlay(svg, msg.info.id);
             };
+            updateMinimap(svg);
 
         } else if( "delete" === msg.action ) {
             deleteItems(svg, [msg.info.id], false);
@@ -280,6 +281,13 @@ function setupMinimap(id) {
     };
 };
 
+function updateMinimap() {
+    documentInfo.dimensions = svgUsedRange(svg);
+    // update viewport of the minimap accordingly
+    let minimap = SVG.get('svgMinimap');
+    minimap.viewbox(documentInfo.dimensions);
+}
+
 // Hotkeys
 document.onkeydown = (e) => {
     e = e || window.event;
@@ -389,6 +397,7 @@ function deleteItems(svg,items,local) {
             };
         };
     };
+    updateMinimap(svg);
 }
 
 function deleteCurrentSelection() {
@@ -542,6 +551,7 @@ function addSelectionOverlay(svg1,singleItem) {
         e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
         broadcastNoteState(noteInfo,'dragmove');
+        updateMinimap(svg);
     };
 
     let dragmove_corner = (event) => {
@@ -588,6 +598,7 @@ function addSelectionOverlay(svg1,singleItem) {
         e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
         broadcastNoteState(noteInfo,'dragmove');
+        updateMinimap(svg);
     };
 
     n.on("dragmove", dragmove_side );
@@ -707,6 +718,7 @@ function makeNote(svg, attrs) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
             let nodeInfo = getNoteInfo(event.target.instance);
             broadcastNoteState(nodeInfo,'dragend');
+            updateMinimap(svg);
         };
     });
     g.on("dragmove", (event) => {
@@ -714,6 +726,7 @@ function makeNote(svg, attrs) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
             let nodeInfo = getNoteInfo(event.target.instance);
             broadcastNoteState(nodeInfo,'dragmove');
+            updateMinimap(svg);
         };
     });
 
@@ -735,6 +748,9 @@ function makeNote(svg, attrs) {
 
     let layer = SVG.get('displayLayerNotes');
     layer.add(g);
+
+    updateMinimap(svg);
+
     return g
 }
 
@@ -888,8 +904,6 @@ function exportAsSvg(svgId) {
  *     Implement editor permissions
  *     Implement local chat
  *     Implement dynamic sizing etc. of the toolbar
- *     Update the minimap viewbox whenever the used document range of the
- *       document changes
  *     Update the minimap with the currently displayed client range
  *     The UI should remain fixed (on the SVG board) while panning
  *     Separate the board-URL from the boardname
