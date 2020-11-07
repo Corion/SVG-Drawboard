@@ -46,7 +46,7 @@ function initDrawboard(svgId) {
 
         // Connect up the rest of the UI
         selectTool("selector");
-        setupMinimap("thumbview");
+        setupMinimap("svgMinimap");
     };
 };
 
