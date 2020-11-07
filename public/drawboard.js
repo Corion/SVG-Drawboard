@@ -829,16 +829,30 @@ function createNote() {
     });
 }
 
-function exportAsSvg() {
-    var svg_blob = new Blob([svg.svg()],
-                            {'type': "image/svg+xml"});
-    var url = URL.createObjectURL(svg_blob);
+function exportAsSvg(svgId) {
+    let svg = SVG.get(svgId);
 
-    var link = document.createElement('a');
+    // Clean up
+    let cursors = SVG.get('displayLayerCursors', svg);
+    let prev = cursors.previous();
+    cursors.remove();
+    let UI = SVG.get('displayLayerUI', svg);
+    UI.remove();
+
+    // Export
+    let svg_blob = new Blob([svg.svg()],
+                            {'type': "image/svg+xml"});
+    let url = URL.createObjectURL(svg_blob);
+
+    let link = document.createElement('a');
     link.download = config.boardname + ".svg";
     link.href = url;
     link.click();
     link.remove();
+
+    // Restore the document again
+    prev.after(cursors);
+    cursors.after(UI);
 };
 
 // console.log(telems);
@@ -918,6 +932,5 @@ function exportAsSvg() {
  *     * [ ] We don't handle rearranging the z-order of items at all
  *     * [ ] Delete key always deletes the note, even in text editing mode
  *     * [ ] A note with empty text can't be clicked to add text again
- *     * [ ] The "save" export also saves any displayed UI :)
  *
  */
