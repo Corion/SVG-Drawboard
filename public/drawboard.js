@@ -924,6 +924,7 @@ function exportAsSvg(svgId) {
  *     Remove the selection UI if the selection is discarded by clicking on the
  *       canvas itself
  *     Multi-note selection should scale the notes by using a matrix to scale
+ *     Exported SVG should have all elements visible and be zoomed out
  */
 
 // Bugs
