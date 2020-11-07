@@ -683,7 +683,9 @@ function makeNote(svg, attrs) {
     });
     t.addClass('text');
     let color = attrs.color || '#ffef40';
-    let b = svg.rect().attr({"fill":color}).size(attrs.width,attrs.height);
+    let b = svg.rect().attr({"fill":color,
+        "filter":"url(#shadow)",
+    }).size(attrs.width,attrs.height);
     b.addClass('main');
     let bb = b.bbox();
 
