@@ -800,17 +800,11 @@ function startTextEditing( event ) {
         // and perform the proper updating
 };
 
-function mkNote(svg,nodeInfo) {
-    let id = nodeInfo.id;
-    let g = makeNote(svg, nodeInfo);
-    return g;
-}
-
 function mkNodes(nodes) {
     for (let node of nodes) {
         switch (node.type) {
             case "note":
-                mkNote(svg,node);
+                makeNote(svg,node);
                 break;
             default:
                 console.log("Unknown node type " + node.type, node);
@@ -821,7 +815,7 @@ function mkNodes(nodes) {
 
 function createNote() {
     let e = event || window.event;
-    mkNote(svg, {
+    makeNote(svg, {
         text: "Your text",
         x: e.clientX,
         y: e.clientY - 200,
