@@ -878,6 +878,9 @@ function exportAsSvg() {
  *     Implement tool modes beyond "select" and "create"
  *     Implement touch support for rotating (separate rotation handle)
  *     Implement download of the SVG, and download of a JSON describing the SVG
+ *         This can be done by constructing the SVG client-side and then eliminating
+ *         the UI layer and the cursor layer, or on the server by simply
+ *         replaying/placing all the active parts.
  *     Implement replay/reupload of the SVG from the JSON describing the SVG
  *     Implement upload of random SVGs (?)
  *     Create item from template
@@ -900,6 +903,7 @@ function exportAsSvg() {
  *            directions. This will be hard.
  *     Remove the selection UI if the selection is discarded by clicking on the
  *       canvas itself
+ *     Multi-note selection should scale the notes by using a matrix to scale
  */
 
 // Bugs
@@ -909,5 +913,6 @@ function exportAsSvg() {
  *           converting between these and <tspan> objects
  *     * [ ] We don't handle rearranging the z-order of items at all
  *     * [ ] Delete key always deletes the note, even in text editing mode
+ *     * [ ] A note with empty text can't be clicked to add text again
  *
  */
