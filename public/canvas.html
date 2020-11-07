@@ -72,11 +72,18 @@ body { margin: 0px; border: 0px; padding: 0px; } /* go fullpage */
     <g id="displayLayerUI"></g>
 
 </svg>
+<!--
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svgUI" viewbox="0 0 1000 1000">
+        <use xlink:href="#svg1" />
+</svg>
+-->
 <div id="thumbview">
     <!-- later, adjust the viewbox to #svg1 dimensions -->
     <!-- later, render the current viewport as rect() over the other document -->
     <svg xmlns:xlink="http://www.w3.org/1999/xlink" viewbox="0 0 1000 1000">
-        <use xlink:href="#svg1" />
+        <use xlink:href="#displayLayerBackground" />
+        <use xlink:href="#displayLayerNotes" />
+        <g id="displayLayerMinimap"></g>
     </svg>
 </div>
 <a href="https://github.com/corion/SVG-Drawboard">Github</a>
