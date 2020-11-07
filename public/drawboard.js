@@ -914,5 +914,6 @@ function exportAsSvg() {
  *     * [ ] We don't handle rearranging the z-order of items at all
  *     * [ ] Delete key always deletes the note, even in text editing mode
  *     * [ ] A note with empty text can't be clicked to add text again
+ *     * [ ] The "save" export also saves any displayed UI :)
  *
  */
