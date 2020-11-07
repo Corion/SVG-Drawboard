@@ -95,6 +95,12 @@ function onMessage(event) {
             user.pointer.x(msg.info.x);
             user.pointer.y(msg.info.y);
 
+            // Update the client screen rect
+            user.viewport.x(msg.info.vx);
+            user.viewport.y(msg.info.vy);
+            user.viewport.width(msg.info.vwidth);
+            user.viewport.height(msg.info.vheight);
+
         } else if( "disconnect" === msg.action ) {
             console.log("Delete user", msg);
             deleteUser( svg, msg.info );
@@ -145,7 +151,17 @@ function mkThrottledBroadcaster(delay,keycols) {
 // debounce/throttle here, and on the server too
 let throttledBroadcastClientCursor = mkThrottledBroadcaster(100,[]);
 function broadcastClientCursor(x,y) {
-    let lastPos = { "x":x, "y":y };
+    // Add the viewport to our broadcast
+    let vb = svg.viewbox();
+    let lastPos = {
+        "x":x,
+        "y":y,
+        "vx" : vb.x,
+        "vy" : vb.y,
+        "vwidth" : vb.width,
+        "vheight" : vb.height,
+    };
+
     throttledBroadcastClientCursor({
             info: lastPos,
             user: config.username,
@@ -327,10 +343,8 @@ document.onmousemove = (e) => {
             let dy = (panStartPoint.y - e.y)/vb.zoom;
             let movedViewBox = {x:vb.x+dx,y:vb.y+dy,width:vb.width,height:vb.height};
             svg.viewbox(movedViewBox.x,movedViewBox.y,movedViewBox.width,movedViewBox.height);
-            // broadcastClientViewbox
-        } else {
-            broadcastClientCursor(documentLoc.x, documentLoc.y);
         };
+        broadcastClientCursor(documentLoc.x, documentLoc.y);
     };
 };
 
@@ -371,7 +385,7 @@ document.onwheel = function(e) {
             let containedId = oldOverlay.data("overlaid");
             addSelectionOverlay(svg, containedId);
         };
-        // broadcastClientViewport();
+        broadcastClientCursor(documentLoc.x, documentLoc.y);
     };
     // Otherwise, handle it as default
 }
@@ -657,10 +671,20 @@ function makeUser(svg, info ) {
         let layer = SVG.get('displayLayerCursors');
         layer.add(g);
 
+        let minimap = SVG.get('displayLayerMinimap');
+        let r = minimap.rect(info.vx, info.vy, info.vwidt, info.vheight);
+        r.attr({
+            "stroke"       : info.usercolor,
+            "stroke-width" : "4",
+            "stroke-dasharray":"5.10.5",
+            "fill-opacity" : 0,
+        });
+
         users[ info.uid ] = {
-            pointer: g,
+            pointer  : g,
             animation: undefined,
-            color: info.usercolor,
+            viewport : r,
+            color    : info.usercolor,
         };
     };
     return users[ info.uid ];
