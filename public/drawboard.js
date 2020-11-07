@@ -273,7 +273,8 @@ function setupMinimap(id) {
         // Scale the click position from the minimap to the viewbox
 
         let movedViewBox = {x:documentLoc.x,y:documentLoc.y,width:vb.width,height:vb.height};
-        svg.viewbox(movedViewBox.x,movedViewBox.y,movedViewBox.width,movedViewBox.height);
+        let bb = svg.bbox();
+        svg.viewbox(movedViewBox.x-bb.cx,movedViewBox.y-bb.cy,movedViewBox.width,movedViewBox.height);
 
         // Broadcast our new viewbox
     };

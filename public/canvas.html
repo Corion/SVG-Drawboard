@@ -41,6 +41,7 @@ body { margin: 0px; border: 0px; padding: 0px; } /* go fullpage */
     position: fixed;
     bottom: 0;
     left: 0;
+    cursor: default;
 }
 
 </style>
@@ -80,7 +81,7 @@ body { margin: 0px; border: 0px; padding: 0px; } /* go fullpage */
 <div id="thumbview">
     <!-- later, adjust the viewbox to #svg1 dimensions -->
     <!-- later, render the current viewport as rect() over the other document -->
-    <svg xmlns:xlink="http://www.w3.org/1999/xlink" viewbox="0 0 1000 1000">
+    <svg id="svgMinimap" xmlns:xlink="http://www.w3.org/1999/xlink" viewbox="0 0 1000 1000">
         <use xlink:href="#displayLayerBackground" />
         <use xlink:href="#displayLayerNotes" />
         <g id="displayLayerMinimap"></g>
