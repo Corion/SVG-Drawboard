@@ -282,18 +282,19 @@ function setupMinimap(id) {
         let documentLoc = pt.transform(new SVG.Matrix(minimap.node.getScreenCTM().inverse()));
 
         // Move the main view accordingly
-        // XXX We really want to move the center of the viewbox, not the top
-        //     left corner, I guess
-        let vb = svg.viewbox();
+        let bb = svg.viewbox();
         let mb = minimap.viewbox();
 
-        // Scale the click position from the minimap to the viewbox
+        let movedViewBox = {
+            x:documentLoc.x-bb.width/2,
+            y:documentLoc.y-bb.height/2,
+            width:bb.width,
+            height:bb.height
+        };
+        svg.viewbox(movedViewBox);
 
-        let movedViewBox = {x:documentLoc.x,y:documentLoc.y,width:vb.width,height:vb.height};
-        let bb = svg.bbox();
-        svg.viewbox(movedViewBox.x-bb.cx,movedViewBox.y-bb.cy,movedViewBox.width,movedViewBox.height);
-
-        // Broadcast our new viewbox
+        // Broadcast the new client rectangle
+        broadcastClientCursor(documentLoc.x, documentLoc.y);
     };
 };
 
