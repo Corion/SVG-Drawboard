@@ -112,6 +112,7 @@ function onMessage(event) {
             deleteUser( svg, msg.info );
 
         } else if( "config" === msg.action ) {
+            //SVG.get('displayLayerInitializing').remove();
             updateConfig(msg.info);
         };
     };
