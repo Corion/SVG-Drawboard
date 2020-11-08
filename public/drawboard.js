@@ -1123,12 +1123,16 @@ function exportAsSvg(svgId) {
  *     Implement upload of random SVGs (?)
  *     Create item from template
  *         database table template
+ *         person template
  *     Implement "join as guest" gateway page that asks for username and password
  *     Implement permissions
  *     Implement read-only permissions
  *     Implement edit-only-own-stuff permissions
  *     Implement editor permissions
  *     Implement local chat
+ *         This is the emergency fallback thing to use if the sidechannel voice
+ *         chat breaks down. Alternatively, people could just put up a sticky
+ *         note instead.
  *     Implement dynamic sizing etc. of the toolbar
  *     The UI should remain fixed (on the SVG board) while panning
  *     Separate the board-URL from the boardname
@@ -1140,6 +1144,14 @@ function exportAsSvg(svgId) {
  *       canvas itself
  *     Multi-note selection should scale the notes by using a matrix to scale
  *     Exported SVG should have all elements visible and be zoomed out
+ *     Consider https://github.com/tabler/tabler-icons for the toolbar icons
+ *     Add zoom+ and zoom- (and 100%) buttons besides the minimap
+ *     Make font identical between <text><tspan> and foreign divs
+ *     Make tspans left/center/right-justifiable per-note
+ *     Have example background templates
+ *         Kanban
+ *         SWOT
+ *         Business Canvas
  */
 
 // Bugs
