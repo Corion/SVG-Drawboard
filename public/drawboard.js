@@ -692,7 +692,13 @@ function makeUser(svg, info ) {
 
 function deleteUser( svg, info ) {
     if( users[ info.uid ]) {
+        if( users[ info.uid ].pointer) {
+            users[ info.uid ].pointer.remove();
+        };
         users[ info.uid ].pointer.remove();
+        if(users[ info.uid ].viewport) {
+            users[ info.uid ].viewport.remove();
+        };
         delete users[ info.uid ];
     };
 }
