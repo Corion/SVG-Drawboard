@@ -1161,5 +1161,6 @@ function exportAsSvg(svgId) {
  *     * [ ] We don't handle rearranging the z-order of items at all
  *     * [ ] Delete key always deletes the note, even in text editing mode
  *     * [ ] A note with empty text can't be clicked to add text again
+ *     * [ ] Single-line text is centered, multiline text is left-aligned
  *
  */
