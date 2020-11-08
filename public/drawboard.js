@@ -1150,6 +1150,7 @@ function exportAsSvg(svgId) {
  *         Kanban
  *         SWOT
  *         Business Canvas
+ *     Automatically choose the text color based on the background brightness
  */
 
 // Bugs
