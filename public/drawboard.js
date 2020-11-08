@@ -302,13 +302,13 @@ function updateMinimap() {
     // update viewport of the minimap accordingly
     let minimap = SVG.get('svgMinimap');
     minimap.viewbox(documentInfo.dimensions);
+    let rUserView = SVG.get('userView');
 }
 
 // Hotkeys
 document.onkeydown = (e) => {
     e = e || window.event;
-    // use e.keyCode
-    console.log(e.keyCode);
+    // console.log(e.keyCode);
 
     if( "selector" === modeTool ) {
         switch(e.keyCode) {
