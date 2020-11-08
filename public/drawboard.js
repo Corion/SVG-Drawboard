@@ -7,8 +7,8 @@ let users = {};
 let state = {
     editedNode    : undefined,
     editedForeign : undefined,
-    actionStack     : [],
-    actionPosition  : 0,
+    actionStack   : [],
+    actionPrev    : -1,
 };
 let uplink;
 let boardname;
@@ -204,6 +204,7 @@ function leaveEditingMode() {
             console.log("Left editing note",state.editedNode);
             let bb = SVG.select('.main', editedNode.node).first().bbox();
             let info = getNoteInfo(editedNode);
+            let oldInfo = { ...info };
             let textdiv = SVG.select('div', state.editedForeign.node).first();
             info.text = textdiv.node.innerText;
             state.editedForeign.remove();
@@ -212,19 +213,29 @@ function leaveEditingMode() {
             // Insert the text word-by-word into a (hidden, otherwise identical)
             // div and whenever the .height changes, create a new TSPAN.
 
-            updateNote(svg, editedNode, info);
+            if( info.text != oldInfo.text ) {
+
+                addAction('edit text',
+                    () => { updateNote(svg, info.id, info); },
+                    () => { updateNote(svg, oldInfo.id, oldInfo); },
+                );
+            };
             state.editedNode = undefined;
         };
     };
 }
 
 function addAction(visual,redo,undo) {
+    if( state.actionPostion < state.actionStack.length -1 ) {
+        state.actionStack.splice(state.actionPostion+1);
+    };
     state.actionStack.push({
         "visual": visual,
         "redo": redo,
         "undo": undo,
     });
-    state.actionPosition++;
+    state.actionPrev = state.actionStack.length -1;
+    console.log(`Action ${state.actionPrev}: ${visual}`);
     redo();
 };
 
@@ -256,11 +267,11 @@ function selectTool(tool) {
 
                 // get/generate a unique id:
                 let notes = SVG.select('.typeNote');
-                let offset = notes.count;
-                let id = `note_{offset}` ;
+                let offset = notes.length();
+                let id = `note_${offset}` ;
                 while( SVG.get(id)) {
                     offset++;
-                    id = `note_{offset}` ;
+                    id = `note_${offset}` ;
                 };
 
 
@@ -368,7 +379,7 @@ document.onkeydown = (e) => {
     e = e || window.event;
     // console.log(e.keyCode);
 
-    if( "selector" === modeTool ) {
+    if( "selector" === modeTool && ! state.editedNode ) {
         switch(e.keyCode) {
             case 78: // "N" - makeNote
                      selectTool("makeNote");
@@ -381,16 +392,24 @@ document.onkeydown = (e) => {
                      console.log(e);
                      if( e.key.toUpperCase() === "Z" && e.ctrlKey ) {
                          // undo
-                         if( state.actionPosition > 0 ) {
-                            state.actionPosition--;
-                            state.actionStack[state.actionPosition].undo();
+                         if( state.actionPrev > -1 ) {
+                            console.log(`undoing ${state.actionPosition}: '${state.actionStack[state.actionPrev].visual}'`);
+                            state.actionStack[state.actionPrev].undo();
+                            state.actionPrev--;
                         };
                      } else if(e.key.toUpperCase() === "Y" && e.ctrlKey) {
                          // redo
-                         if( state.actionPosition < state.actionStack.length ) {
-                            state.actionStack[state.actionPosition].redo();
-                            state.actionPosition++;
+                         let actionNext = state.actionPrev+1;
+                         if( actionNext <= state.actionStack.length -1) {
+                            console.log(`redoing ${actionNext}: '${state.actionStack[actionNext].visual}'`);
+                            state.actionStack[actionNext].redo();
+                            state.actionPrev = actionNext;
                          };
+                     };
+                     if( state.actionPrev > -1 ) {
+                         console.log( `Next undoable action: ${state.actionStack[state.actionPrev].visual}`);
+                     } else {
+                         console.log( 'No undoable action');
                      };
                      break;
             case 46: // del
@@ -522,8 +541,16 @@ function chooseColorCurrentSelection() {
         colorPicker.href = '#';
         colorPicker.onchange = (e) => {
             if( colorPicker.value != noteInfo.color ) {
+                let prevNoteInfo = { ...noteInfo };
                 noteInfo.color = colorPicker.value;
-                updateNote(svg,containedId, noteInfo);
+                addAction('set color',
+                    () => {
+                        updateNote(svg,containedId, noteInfo);
+                    },
+                    () => {
+                        updateNote(svg,containedId, prevNoteInfo);
+                    }
+                );
 
                 let icon = svg.select( ".currentcolor", toolbar).first();
                 if( icon ) {
@@ -728,6 +755,22 @@ function addSelectionOverlay(svg1,singleItem) {
     ne.on("dragmove",dragmove_corner);
     se.on("dragmove",dragmove_corner);
 
+    let dragend = () => {
+        let currInfo = getNoteInfo(SVG.get(singleItem));
+        addAction('scale',
+            () => { makeNote(svg, currInfo )},
+            () => { makeNote(svg, noteInfo )},
+        );
+    };
+    n.on("dragend", dragend );
+    e.on("dragend", dragend );
+    s.on("dragend", dragend );
+    w.on("dragend", dragend );
+    nw.on("dragend",dragend );
+    sw.on("dragend",dragend );
+    ne.on("dragend",dragend );
+    se.on("dragend",dragend );
+
     // Scale the toolbar inverse to our zoom, so the size in pixels remains
     let obb = overlay.bbox(); // Adjust for sides of the viewbox, later
     let toolbar = svg.use("toolbar");
@@ -843,6 +886,7 @@ function makeNote(svg, attrs) {
         return e.which === 1
     };
     let dragging;
+    let oldNoteState = attrs;
     g.on("dragstart", (event) => {
         dragging = true;
     });
@@ -850,8 +894,17 @@ function makeNote(svg, attrs) {
         if( dragging ) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
             let nodeInfo = getNoteInfo(event.target.instance);
-            broadcastNoteState(nodeInfo,'dragend');
-            updateMinimap(svg);
+
+            if(    nodeInfo.x != attrs.x
+                || nodeInfo.y != attrs.y ) {
+                addAction('move/scale',
+                    () => { makeNote(svg, nodeInfo )},
+                    () => { makeNote(svg, attrs )},
+                );
+
+                broadcastNoteState(nodeInfo,'dragend');
+                updateMinimap(svg);
+            };
         };
     });
     g.on("dragmove", (event) => {
@@ -993,13 +1046,19 @@ function exportAsSvg(svgId) {
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
  *     Implement moving notes to back/front
- *     Implement (local) undo
  *     Implement editing layers, or at least a background layer
  *         We'll need at least two editing layers:
  *         Notes etc.
  *         Background (only selectable in a special mode)
- *     Implement defined zones where you can one-click to move/zoom to
+ *     Implement defined "bookmark" zones where you can one-click to move/zoom to
+ *         Would these live on the background?
  *     Implement (note) context menus
+ *         "Send to background layer"
+ *         "Send to foreground layer"
+ *         "move to back"
+ *         "move to front"
+ *         "move forward"
+ *         "move backward"
  *     Implement (inline) images
  *     Implement command line client for uploading images
  *     Implement (server-side) images
@@ -1016,6 +1075,7 @@ function exportAsSvg(svgId) {
  *     Implement replay/reupload of the SVG from the JSON describing the SVG
  *     Implement upload of random SVGs (?)
  *     Create item from template
+ *         database table template
  *     Implement "join as guest" gateway page that asks for username and password
  *     Implement permissions
  *     Implement read-only permissions
