@@ -279,6 +279,9 @@ function setupMinimap(id) {
     let minimap = new SVG(id);
     let minimapPanning;
 
+    minimap.width( DOMminimap.parentNode.clientWidth );
+    minimap.height( DOMminimap.parentNode.clientHeight );
+
     let doUpdateMinimap = (e) => {
         if( minimapPanning ) {
             let pt = new SVG.Point(e.clientX, e.clientY);
