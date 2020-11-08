@@ -277,25 +277,35 @@ function svgUsedRange(svg) {
 function setupMinimap(id) {
     let DOMminimap = document.getElementById(id);
     let minimap = new SVG(id);
-    DOMminimap.onclick = (e) => {
-        let pt = new SVG.Point(e.clientX, e.clientY);
-        let documentLoc = pt.transform(new SVG.Matrix(minimap.node.getScreenCTM().inverse()));
+    let minimapPanning;
 
-        // Move the main view accordingly
-        let bb = svg.viewbox();
-        let mb = minimap.viewbox();
+    let doUpdateMinimap = (e) => {
+        if( minimapPanning ) {
+            let pt = new SVG.Point(e.clientX, e.clientY);
+            let documentLoc = pt.transform(new SVG.Matrix(minimap.node.getScreenCTM().inverse()));
 
-        let movedViewBox = {
-            x:documentLoc.x-bb.width/2,
-            y:documentLoc.y-bb.height/2,
-            width:bb.width,
-            height:bb.height
+            // Move the main view accordingly
+            let bb = svg.viewbox();
+            let mb = minimap.viewbox();
+
+            let movedViewBox = {
+                x:documentLoc.x-bb.width/2,
+                y:documentLoc.y-bb.height/2,
+                width:bb.width,
+                height:bb.height
+            };
+            setClientViewbox(documentLoc.x, documentLoc.y, movedViewBox);
         };
-        svg.viewbox(movedViewBox);
-
-        // Broadcast the new client rectangle
-        broadcastClientCursor(documentLoc.x, documentLoc.y);
     };
+    DOMminimap.onmousedown = (e) => {
+        minimapPanning = true;
+        doUpdateMinimap(e);
+    };
+    DOMminimap.onmouseup = (e) => {
+        doUpdateMinimap(e);
+        minimapPanning = false;
+    };
+    DOMminimap.onmousemove = doUpdateMinimap;
 };
 
 function updateMinimap() {
