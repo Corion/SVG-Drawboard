@@ -849,13 +849,56 @@ function deleteUser( svg, info ) {
     };
 }
 
+// Returns a list of strings by measuring a TSPAN elements in the target TEXT
+// element wrapping either on \n or word-wrap on the width
+
+//     let lines = wrapText(textElement, textElement.width, 'Hello World');
+function wrapText(target,width,text) {
+    let words = text.split(/\s+/);
+    // We always (re)wrap ...
+    // Later, keep newlines as hard breaks
+    let lines = [];
+    let line = '';
+    let measure = target.tspan('');
+    while( words.length ) {
+        let word = words.shift();
+        measure.clear();
+        measure.text(`${line} ${word}`);
+        let w = measure.length();
+        if(    word !== "\n" && w <= width ) {
+            if( line !== '' ) {
+                line += " ";
+            };
+            line += word;
+        } else {
+            // Output this line
+            measure.clear();
+            lines.push(line);
+            line = '';
+            if( word !== "\n" ) {
+                line = word;
+            };
+        };
+    };
+    // Output the remaining accumulated text
+    if( line !== "" ) {
+        lines.push(line);
+    };
+    // Clean up
+    measure.clear();
+    // measure.remove(); // this fails for an unknown reason
+    return lines;
+}
+
 // Creates or replaces a note
 function makeNote(svg, attrs) {
 
-    let t = svg.text((t) => {
-        t.tspan(attrs.text).attr({"fill":"black","font-weight":"bold"});
-    });
+    // We create the text element first so our hand-rolled word wrapping
+    // works with the correct font parameters
+    let t = svg.text('').attr({"fill":"black","font-weight":"bold"});
     t.addClass('text');
+    let text = wrapText(t, attrs.width, attrs.text).join("\n");
+    t.text(text);
     let color = attrs.color || '#ffef40';
     let b = svg.rect().attr({"fill":color,
         "filter":"url(#shadow)",
@@ -864,6 +907,8 @@ function makeNote(svg, attrs) {
     let bb = b.bbox();
 
     var g = svg.group();
+    g.addClass('userElement');
+    g.addClass('typeNote'); // Maybe as data element instead?!
     g.add(b);
     g.add(t);
 
@@ -958,6 +1003,7 @@ function startTextEditing( event ) {
         // Overlay the "paper" we write on
         let t = event.target.instance;
         let note = t.parent(SVG.G);
+        let text = t.parent(SVG.Text);
         note.fixed();
         let bb = SVG.select('.main', note.node).first().bbox();
 
@@ -969,7 +1015,7 @@ function startTextEditing( event ) {
 
         let textdiv = document.createElement("div");
         let textspan = document.createElement("div");
-        let textnode = document.createTextNode(t.text());
+        let textnode = document.createTextNode(text.text());
         textdiv.setAttribute("contentEditable", "true");
         textdiv.classList.add("insideforeign"); //to make div fit text
         textdiv.appendChild(textspan);
