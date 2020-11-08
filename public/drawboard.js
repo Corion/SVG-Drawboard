@@ -4,6 +4,10 @@ let svg;
 // Set by the "config" message, below
 let config = {};
 let users = {};
+let state = {
+    editedNode    : undefined,
+    editedForeign : undefined,
+};
 let uplink;
 let boardname;
 let documentInfo;
@@ -192,22 +196,22 @@ var template = {
 */
 
 function leaveEditingMode() {
-    if( state_editedNode ) {
-        let editedNode = SVG.get(state_editedNode);
+    if( state.editedNode ) {
+        let editedNode = SVG.get(state.editedNode);
         if( editedNode && ! editedNode.node.contains( event.target )) {
-            console.log("Left editing note",state_editedNode);
+            console.log("Left editing note",state.editedNode);
             let bb = SVG.select('.main', editedNode.node).first().bbox();
             let info = getNoteInfo(editedNode);
-            let textdiv = SVG.select('div', state_editedForeign.node).first();
+            let textdiv = SVG.select('div', state.editedForeign.node).first();
             info.text = textdiv.node.innerText;
-            state_editedForeign.remove();
+            state.editedForeign.remove();
 
             // Now, find the lines in the content, and have them as TSPAN
             // Insert the text word-by-word into a (hidden, otherwise identical)
             // div and whenever the .height changes, create a new TSPAN.
 
             updateNote(svg, editedNode, info);
-            state_editedNode = undefined;
+            state.editedNode = undefined;
         };
     };
 }
@@ -814,8 +818,6 @@ function updateNote(svg, note, attrs) {
     return newNote;
 };
 
-let state_editedNode;
-let state_editedForeign;
 function startTextEditing( event ) {
         // If we were already editing a different object, quit doing that
         leaveEditingMode();
@@ -848,8 +850,8 @@ function startTextEditing( event ) {
         note.add(myforeign);
         myforeign.transform(transform);
         myforeign.node.appendChild(textdiv);
-        state_editedNode = note.attr('id');
-        state_editedForeign = myforeign;
+        state.editedNode = note.attr('id');
+        state.editedForeign = myforeign;
 
         // selectTool() will detect that we left text editing mode
         // and perform the proper updating
