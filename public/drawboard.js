@@ -1015,12 +1015,10 @@ function startTextEditing( event ) {
         });
 
         let textdiv = document.createElement("div");
-        let textspan = document.createElement("div");
         let textnode = document.createTextNode(text.text());
         textdiv.setAttribute("contentEditable", "true");
         textdiv.classList.add("insideforeign"); //to make div fit text
-        textdiv.appendChild(textspan);
-        textspan.appendChild(textnode);
+        textdiv.appendChild(textnode);
 
         // XXX We would like to center on the tspan, or whatever?!
         let transform = new SVG.Matrix(t);
