@@ -460,6 +460,32 @@ function colorCurrentSelection() {
     };
 }
 
+function chooseColorCurrentSelection() {
+    let overlay = SVG.get("overlay");
+    if( overlay ) {
+        let containedId = overlay.data("overlaid");
+        let item = SVG.get(containedId);
+        let noteInfo = getNoteInfo(item);
+        let colorPicker = document.createElement('input');
+        colorPicker.type = 'color';
+        colorPicker.value = noteInfo.color;
+        colorPicker.href = '#';
+        colorPicker.onchange = (e) => {
+            if( colorPicker.value != noteInfo.color ) {
+                noteInfo.color = colorPicker.value;
+                updateNote(svg,containedId, noteInfo);
+
+                let icon = svg.select( ".currentcolor", toolbar).first();
+                if( icon ) {
+                    icon.fill(noteInfo.color);
+                };
+            };
+        };
+        colorPicker.click();
+        colorPicker.remove();
+    };
+}
+
 function removeSelectionOverlay(svg1) {
     let oldOverlay = SVG.get("overlay");
     if( oldOverlay ) {
@@ -489,6 +515,7 @@ function addSelectionOverlay(svg1,singleItem) {
     let scale = 1/svg.viewbox().zoom;
 
     let item = SVG.get(singleItem);
+    let noteInfo = getNoteInfo(item); // if type='note' ...
     if( ! item ) {
         console.log("No item found for id '"+singleItem+"' (?!)");
     };
@@ -660,7 +687,7 @@ function addSelectionOverlay(svg1,singleItem) {
     toolbar.y(obb.y - tbb.height - 8*scale);
     toolbar.scale(scale);
     let icon = svg.select( ".currentcolor", toolbar).first();
-    icon.fill(config.usercolor);
+    icon.fill(noteInfo.color);
 
     let layer = SVG.get('displayLayerUI');
     layer.add(overlay);
@@ -926,11 +953,11 @@ function exportAsSvg(svgId) {
  *     Implement (inline) images
  *     Implement command line client for uploading images
  *     Implement (server-side) images
- *     Implement note color (using <input type="color> preferrably)
  *     Implement touch support for handles
  *     Implement touch support for moving an element (separate move handle)
  *     Implement support for rotation
  *     Implement tool modes beyond "select" and "create"
+ *         Paste-color for example
  *     Implement touch support for rotating (separate rotation handle)
  *     Implement download of the SVG, and download of a JSON describing the SVG
  *         This can be done by constructing the SVG client-side and then eliminating
