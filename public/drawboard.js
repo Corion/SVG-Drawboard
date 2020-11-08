@@ -306,6 +306,13 @@ function updateMinimap() {
     let rUserView = SVG.get('userView');
 }
 
+function setClientViewbox(cursorX, cursorY, newViewBox) {
+        svg.viewbox(newViewBox);
+
+        // Broadcast the new client rectangle
+        broadcastClientCursor(cursorX, cursorY);
+}
+
 // Hotkeys
 document.onkeydown = (e) => {
     e = e || window.event;
@@ -343,9 +350,10 @@ document.onmousemove = (e) => {
             let dx = (panStartPoint.x - e.x)/vb.zoom;
             let dy = (panStartPoint.y - e.y)/vb.zoom;
             let movedViewBox = {x:vb.x+dx,y:vb.y+dy,width:vb.width,height:vb.height};
-            svg.viewbox(movedViewBox.x,movedViewBox.y,movedViewBox.width,movedViewBox.height);
+            setClientViewbox(documentLoc.x, documentLoc.y, movedViewBox);
+        } else {
+            broadcastClientCursor(documentLoc.x, documentLoc.y);
         };
-        broadcastClientCursor(documentLoc.x, documentLoc.y);
     };
 };
 
