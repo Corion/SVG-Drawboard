@@ -868,18 +868,6 @@ function mkNodes(nodes) {
     }
 }
 
-function createNote() {
-    let e = event || window.event;
-    makeNote(svg, {
-        text: "Your text",
-        x: e.clientX,
-        y: e.clientY - 200,
-        width: 100,
-        height: 100,
-
-    });
-}
-
 function exportAsSvg(svgId) {
     let svg = SVG.get(svgId);
 
