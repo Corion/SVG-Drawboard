@@ -953,7 +953,6 @@ function exportAsSvg(svgId) {
  *     Implement editor permissions
  *     Implement local chat
  *     Implement dynamic sizing etc. of the toolbar
- *     Update the minimap with the currently displayed client range
  *     The UI should remain fixed (on the SVG board) while panning
  *     Separate the board-URL from the boardname
  *     Reconnect the websocket upon disconnect - how will we synch up then?
