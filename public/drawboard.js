@@ -7,6 +7,8 @@ let users = {};
 let state = {
     editedNode    : undefined,
     editedForeign : undefined,
+    actionStack     : [],
+    actionPosition  : 0,
 };
 let uplink;
 let boardname;
@@ -216,6 +218,16 @@ function leaveEditingMode() {
     };
 }
 
+function addAction(visual,redo,undo) {
+    state.actionStack.push({
+        "visual": visual,
+        "redo": redo,
+        "undo": undo,
+    });
+    state.actionPosition++;
+    redo();
+};
+
 let modeTool;
 function selectTool(tool) {
     let callback;
@@ -241,16 +253,37 @@ function selectTool(tool) {
             callback = (e) => {
                 let pt = new SVG.Point(e.clientX, e.clientY);
                 let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
-                let note = makeNote(svg, {
+
+                // get/generate a unique id:
+                let notes = SVG.select('.typeNote');
+                let offset = notes.count;
+                let id = `note_{offset}` ;
+                while( SVG.get(id)) {
+                    offset++;
+                    id = `note_{offset}` ;
+                };
+
+
+                let info = {
+                    "id" : id,
                     x : documentLoc.x,
                     y : documentLoc.y,
                     width : 100,
                     height : 100,
                     text: "enter text",
-                });
-                addSelectionOverlay(svg,note.attr('id'));
-                // XXX directly enter text entry mode?
+                };
 
+                addAction('new note',
+                    () => {
+                        let note = makeNote(svg, info);
+                    },
+                    () => {
+                        deleteItems(svg, [ id ], true);
+                    }
+                );
+
+                // XXX directly enter text entry mode?
+                addSelectionOverlay(svg, info.id);
                 /* reset cursor and tool */
                 selectTool("selector");
             };
@@ -343,6 +376,23 @@ document.onkeydown = (e) => {
             // "B" - showNavigationPane
             // "<space>" - (while held down) selectPanTool
 
+            case 89:
+            case 90: // "Z","Y" - undo (we only support azerty/qwerty/qwertz here)
+                     console.log(e);
+                     if( e.key.toUpperCase() === "Z" && e.ctrlKey ) {
+                         // undo
+                         if( state.actionPosition > 0 ) {
+                            state.actionPosition--;
+                            state.actionStack[state.actionPosition].undo();
+                        };
+                     } else if(e.key.toUpperCase() === "Y" && e.ctrlKey) {
+                         // redo
+                         if( state.actionPosition < state.actionStack.length ) {
+                            state.actionStack[state.actionPosition].redo();
+                            state.actionPosition++;
+                         };
+                     };
+                     break;
             case 46: // del
                     deleteCurrentSelection();
                     break;
