@@ -1015,6 +1015,11 @@ function startTextEditing( event ) {
         });
 
         let textdiv = document.createElement("div");
+        let fontInfo = window.getComputedStyle(text.node, null);
+        textdiv.style.fontFamily = fontInfo.fontFamily;
+        textdiv.style.fontStyle = fontInfo.fontStyle;
+        textdiv.style.fontWeight = fontInfo.fontWeight;
+        textdiv.style.fontSize = fontInfo.fontSize;
         let textnode = document.createTextNode(text.text());
         textdiv.setAttribute("contentEditable", "true");
         textdiv.classList.add("insideforeign"); //to make div fit text
