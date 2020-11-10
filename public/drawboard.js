@@ -248,6 +248,7 @@ function selectTool(tool) {
     leaveEditingMode();
 
     modeTool = tool;
+    let modeEvent = "click";
     switch (tool) {
         case "selector":
             svg.node.style.setProperty('cursor','default');
@@ -304,12 +305,12 @@ function selectTool(tool) {
     }
 
     if( callback ) {
-        svg.off("click");
-        svg.on("click", callback);
+        svg.off(modeEvent);
+        svg.on(modeEvent, callback);
     } else {
         // Can we always switch off the callback? This conflicts with
         // the normal selection ...
-        svg.off("click");
+        svg.off(modeEvent);
     };
 }
 
