@@ -1133,6 +1133,8 @@ function exportAsSvg(svgId) {
  *         This can be done by constructing the SVG client-side and then eliminating
  *         the UI layer and the cursor layer, or on the server by simply
  *         replaying/placing all the active parts.
+ *     Implement JS-free download of the SVG
+ *     Exported SVG should have all elements visible and be zoomed out
  *     Implement replay/reupload of the SVG from the JSON describing the SVG
  *     Implement upload of random SVGs (?)
  *     Create shape from template
@@ -1157,7 +1159,6 @@ function exportAsSvg(svgId) {
  *     Remove the selection UI if the selection is discarded by clicking on the
  *       canvas itself
  *     Multi-note selection should scale the notes by using a matrix to scale
- *     Exported SVG should have all elements visible and be zoomed out
  *     Consider https://github.com/tabler/tabler-icons for the toolbar icons
  *     Add zoom+ and zoom- (and 100%) buttons besides the minimap
  *     Minimum zoom/maximum zoom?
