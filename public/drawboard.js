@@ -302,6 +302,79 @@ function selectTool(tool) {
                 selectTool("selector");
             };
             break;
+
+        case "makeLine":
+            svg.node.style.setProperty('cursor','crosshair');
+
+            // How can we immediately drag a line if we want to only listen
+            // to "click" below? Maybe we need to add a type of event as well?!
+            modeEvent = "mousedown";
+            callback = (e) => {
+                // Well, we only want button 1:
+                if( e.which !== 1 ) {
+                    svg.off("mouseup");
+                    selectTool("selector");
+                    return;
+                };
+
+                let pt = new SVG.Point(e.clientX, e.clientY);
+                let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
+
+                // get/generate a unique id:
+                let notes = SVG.select('.typeLine');
+                let offset = notes.length();
+                let id = `line_${offset}` ;
+                while( SVG.get(id)) {
+                    offset++;
+                    id = `line_${offset}` ;
+                };
+
+                let info = {
+                    "id" : id,
+                    type: "line",
+                    startX : documentLoc.x,
+                    startY : documentLoc.y,
+                    width : 100,
+                    text: "enter text",
+                };
+
+                svg.on("mousemove", (e) => {
+                    let pt = new SVG.Point(e.clientX, e.clientY);
+                    let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
+                    info.endX = documentLoc.x;
+                    info.endY = documentLoc.y;
+
+                    let shape = makeLine(svg, info);
+
+                    // Prevent text selection
+                    e.preventDefault();
+                });
+
+                svg.on("mouseup", (e) => {
+                    let pt = new SVG.Point(e.clientX, e.clientY);
+                    let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
+                    info.endX = documentLoc.x;
+                    info.endY = documentLoc.y;
+
+                    addAction('new line',
+                        () => {
+                            let shape = makeLine(svg, info);
+                        },
+                        () => {
+                            deleteItems(svg, [ id ], true);
+                        }
+                    );
+                    /* reset cursor and tool */
+                    svg.off("mousedown");
+                    svg.off("mousemove");
+                    svg.off("mouseup");
+                    selectTool("selector");
+                    addSelectionOverlay(svg, info.id);
+                });
+                // We should allow to cancel drawing the line using "escape"
+
+            };
+            break;
     }
 
     if( callback ) {
@@ -1005,6 +1078,109 @@ function updateNote(svg, note, attrs) {
     broadcastNoteState(getNoteInfo(newNote),'textedit');
     return newNote;
 };
+
+// Creates or replaces a line
+function makeLine(svg, attrs) {
+
+    // We create the text element first so our hand-rolled word wrapping
+    // works with the correct font parameters
+    let t = svg.text('').attr({"fill":"black","font-weight":"bold"});
+    t.addClass('text');
+    let text = wrapText(t, attrs.width, attrs.text).join("\n");
+    t.text(text);
+    let color = attrs.color || '#ffef40';
+    let leftUpper = {
+        x : Math.min(attrs.startX, attrs.endX),
+        y : Math.min(attrs.startY, attrs.endY),
+    };
+    let l = svg.line(
+                attrs.startX-leftUpper.x,
+                attrs.startY-leftUpper.y,
+                attrs.endX-leftUpper.x,
+                attrs.endY-leftUpper.y
+            ).stroke({ width: 1 });
+    l.addClass('main');
+    let bb = l.bbox();
+
+    var g = svg.group();
+    g.addClass('userElement');
+    g.addClass('typeLine'); // Maybe as data element instead?!
+    g.add(l);
+    g.add(t);
+    g.move(leftUpper.x, leftUpper.y);
+
+    // Text is allowed to bleed out of the "paper"
+    t.center(bb.cx,bb.cy);
+
+    // t.on('click', startTextEditing);
+
+    g.on("mousedown", (event) => {
+        // We only want to select with the (primary) mouse button
+        if( event.which === 1 ) {
+            let overlay = addSelectionOverlay(svg, g.attr('id'));
+        };
+    });
+
+/*
+    g.draggy();
+    g.beforedrag = (e) => {
+        // We only want to drag with the (primary) mouse button
+        return e.which === 1
+    };
+    let dragging;
+    let oldNoteState = attrs;
+    g.on("dragstart", (event) => {
+        dragging = true;
+    });
+    g.on("dragend", (event) => {
+        if( dragging ) {
+            addSelectionOverlay(svg, event.target.instance.attr('id'));
+            let nodeInfo = getNoteInfo(event.target.instance);
+
+            if(    nodeInfo.x != attrs.x
+                || nodeInfo.y != attrs.y ) {
+                addAction('move/scale',
+                    () => { makeNote(svg, nodeInfo )},
+                    () => { makeNote(svg, attrs )},
+                );
+
+                broadcastNoteState(nodeInfo,'dragend');
+                updateMinimap(svg);
+            };
+        };
+    });
+    g.on("dragmove", (event) => {
+        if( dragging ) {
+            addSelectionOverlay(svg, event.target.instance.attr('id'));
+            let nodeInfo = getNoteInfo(event.target.instance);
+            broadcastNoteState(nodeInfo,'dragmove');
+            updateMinimap(svg);
+        };
+    });
+*/
+    if( attrs.id ) {
+        let oldNode = SVG.get(attrs.id);
+        if( oldNode && oldNode.parent() ) {
+            if( oldNode === g ) {
+                console.log("Old and new node are identical?!");
+            } else {
+                // console.log("Replacing old item", oldNode, g);
+                oldNode.replace( g );
+            };
+        };
+        g.attr('id', attrs.id);
+    } else {
+        // Assign our prefix here to prevent collisions with other clients
+        g.id(config.connection_prefix+"-"+g.id());
+    };
+
+    let layer = SVG.get('displayLayerNotes');
+    layer.add(g);
+
+    updateMinimap(svg);
+
+    return g
+}
 
 function startTextEditing( event ) {
         // If we were already editing a different object, quit doing that
