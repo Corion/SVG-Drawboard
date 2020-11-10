@@ -1363,7 +1363,7 @@ function exportAsSvg(svgId) {
  *         Notes/Shapes etc.
  *         Background (only selectable in a special mode)
  *     Implement defined "bookmark" zones where you can one-click to move/zoom to
- *         Would these live on the background?
+ *         Would these live on the background? Or get their own layer
  *     Implement (note) context menus
  *         "Send to background layer"
  *         "Send to foreground layer"
