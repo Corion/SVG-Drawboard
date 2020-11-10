@@ -684,173 +684,212 @@ function addSelectionOverlay(svg1,singleItem) {
 
     overlay.data("overlaid",item,true); // We want to store an object reference
 
-    // Add eight svg.circle() as handles for sizing the selection
-    let w = svg.circle(8*scale).attr({'cursor':'w-resize'});
-    w.center(0+item.x(),item.y()+bb.h/2);
-    w.draggy((x,y) => {
-        return {"x":x,"y":false}
-    });
-    overlay.add(w);
+    if( shapeInfo.type === 'line' ) {
+        let s = svg.circle(8*scale).attr({'cursor':'resize'});
+        s.center(shapeInfo.startX, shapeInfo.startY);
+        s.draggy();
+        overlay.add(s);
 
-    let e = svg.circle(8*scale).attr({'cursor':'e-resize'});
-    e.center(bb.w+item.x(),item.y()+bb.h/2);
-    e.draggy((x,y) => {
-        return {"x":x,"y":false}
-    });
-    overlay.add(e);
+        let dragDims;
+        s.on("dragstart", (e) => {
+            dragDims = ['startX','startY'];
+        });
+        let dragmove = (e) => {
+            let newDims = getShapeInfo(SVG.get(singleItem));
+            let pt = new SVG.Point(e.detail.event.clientX, e.detail.event.clientY);
+            let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
+            newDims[ dragDims[0]] = documentLoc.x;
+            newDims[ dragDims[1]] = documentLoc.y;
 
-    let n = svg.circle(8*scale).attr({'cursor':'n-resize'});
-    n.center(bb.w/2+item.x(),item.y()+0);
-    n.draggy((x,y) => {
-        return {"x":false,"y":y}
-    });
-    overlay.add(n);
+            let newLine = makeLine( svg, newDims );
 
-    let s = svg.circle(8*scale).attr({'cursor':'s-resize'});
-    s.center(bb.w/2+item.x(),item.y()+bb.h);
-    s.draggy((x,y) => {
-        return {"x":false,"y":y}
-    });
-    overlay.add(s);
+            // broadcastNoteState(shapeInfo,'dragmove');
+            updateMinimap(svg);
+        };
+        s.on("dragmove", dragmove);
+        s.on("dragend",  dragmove);
 
-    let nw = svg.circle(8*scale).attr({'cursor':'nw-resize'});
-    nw.center(0+item.x(),0+item.y());
-    nw.draggy((x,y) => {
-        return {"x":x,"y":y}
-    });
-    overlay.add(nw);
+        let e = svg.circle(8*scale).attr({'cursor':'resize'});
+        e.center(shapeInfo.endX, shapeInfo.endY);
+        e.draggy();
+        overlay.add(e);
+        e.on("dragstart", (e) => {
+            dragDims = ['endX','endY'];
+        });
+        e.on("dragmove", dragmove);
+        e.on("dragend",  dragmove);
 
-    let ne = svg.circle(8*scale).attr({'cursor':'ne-resize'});
-    ne.center(item.x()+bb.w,0+item.y());
-    ne.draggy((x,y) => {
-        return {"x":x,"y":y}
-    });
-    overlay.add(ne);
+    } else if( shapeInfo.type === 'note') {
+        // Rectangular selection overlay, for non-line shapes
 
-    let se = svg.circle(8*scale).attr({'cursor':'se-resize'})
-    se.center(item.x()+bb.w,bb.h+item.y());
-    se.draggy((x,y) => {
-        return {"x":x,"y":y}
-    });
-    overlay.add(se);
+        // Add eight svg.circle() as handles for sizing the selection
+        let w = svg.circle(8*scale).attr({'cursor':'w-resize'});
+        w.center(0+item.x(),item.y()+bb.h/2);
+        w.draggy((x,y) => {
+            return {"x":x,"y":false}
+        });
+        overlay.add(w);
 
-    let sw = svg.circle(8*scale).attr({'cursor':'sw-resize'})
-    sw.center(item.x()+0,bb.h+item.y());
-    sw.draggy((x,y) => {
-        return {"x":x,"y":y}
-    });
-    overlay.add(sw);
+        let e = svg.circle(8*scale).attr({'cursor':'e-resize'});
+        e.center(bb.w+item.x(),item.y()+bb.h/2);
+        e.draggy((x,y) => {
+            return {"x":x,"y":false}
+        });
+        overlay.add(e);
 
-    // Also, log any moving, for later communication
-    let dragmove_side = (event) => {
-        let item = SVG.get(singleItem);
-        let noteInfo = getNoteInfo(item);
+        let n = svg.circle(8*scale).attr({'cursor':'n-resize'});
+        n.center(bb.w/2+item.x(),item.y()+0);
+        n.draggy((x,y) => {
+            return {"x":false,"y":y}
+        });
+        overlay.add(n);
 
-        // Reconstruct width/height, then set it
-        let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
-        //console.log(e,newbb.w);
-        noteInfo.width = newbb.w;
-        noteInfo.height = newbb.h;
-        noteInfo.x = w.cx();
-        noteInfo.y = n.cy();
-        //console.log(newbb.w);
-        let newNote = makeNote(svg,noteInfo);
+        let s = svg.circle(8*scale).attr({'cursor':'s-resize'});
+        s.center(bb.w/2+item.x(),item.y()+bb.h);
+        s.draggy((x,y) => {
+            return {"x":false,"y":y}
+        });
+        overlay.add(s);
 
-        let info = {
-            from : { x: null, y: null },
-            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+        let nw = svg.circle(8*scale).attr({'cursor':'nw-resize'});
+        nw.center(0+item.x(),0+item.y());
+        nw.draggy((x,y) => {
+            return {"x":x,"y":y}
+        });
+        overlay.add(nw);
+
+        let ne = svg.circle(8*scale).attr({'cursor':'ne-resize'});
+        ne.center(item.x()+bb.w,0+item.y());
+        ne.draggy((x,y) => {
+            return {"x":x,"y":y}
+        });
+        overlay.add(ne);
+
+        let se = svg.circle(8*scale).attr({'cursor':'se-resize'})
+        se.center(item.x()+bb.w,bb.h+item.y());
+        se.draggy((x,y) => {
+            return {"x":x,"y":y}
+        });
+        overlay.add(se);
+
+        let sw = svg.circle(8*scale).attr({'cursor':'sw-resize'})
+        sw.center(item.x()+0,bb.h+item.y());
+        sw.draggy((x,y) => {
+            return {"x":x,"y":y}
+        });
+        overlay.add(sw);
+
+        // Also, log any moving, for later communication
+        let dragmove_side = (event) => {
+            let item = SVG.get(singleItem);
+            let noteInfo = getNoteInfo(item);
+
+            // Reconstruct width/height, then set it
+            let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
+            //console.log(e,newbb.w);
+            noteInfo.width = newbb.w;
+            noteInfo.height = newbb.h;
+            noteInfo.x = w.cx();
+            noteInfo.y = n.cy();
+            //console.log(newbb.w);
+            let newNote = makeNote(svg,noteInfo);
+
+            let info = {
+                from : { x: null, y: null },
+                to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+            };
+
+            item = newNote;
+
+            // Adjust the four corner handles
+            nw.center(item.x(),        item.y());
+            ne.center(item.x()+newbb.w,item.y());
+            sw.center(item.x(),        item.y()+newbb.h);
+            se.center(item.x()+newbb.w,item.y()+newbb.h);
+
+            // Adjust the four side handles
+            n.center(item.x()+newbb.w/2,item.y()        );
+            s.center(item.x()+newbb.w/2,item.y()+newbb.h);
+            w.center(item.x()        ,  item.y()+newbb.h/2);
+            e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
+
+            broadcastNoteState(noteInfo,'dragmove');
+            updateMinimap(svg);
         };
 
-        item = newNote;
+        let dragmove_corner = (event) => {
+            let item = SVG.get(singleItem);
+            let noteInfo = getNoteInfo(item);
 
-        // Adjust the four corner handles
-        nw.center(item.x(),        item.y());
-        ne.center(item.x()+newbb.w,item.y());
-        sw.center(item.x(),        item.y()+newbb.h);
-        se.center(item.x()+newbb.w,item.y()+newbb.h);
+            let info = {
+                from : { x: null, y: null },
+                to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+            };
 
-        // Adjust the four side handles
-        n.center(item.x()+newbb.w/2,item.y()        );
-        s.center(item.x()+newbb.w/2,item.y()+newbb.h);
-        w.center(item.x()        ,  item.y()+newbb.h/2);
-        e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
+            // Find which handle we moved, and adjust the two neighbouring
+            // handles accordingly...
+            if( event.target === nw.node ) {
+                sw.cx( nw.cx() );
+                ne.cy( nw.cy() );
+            };
+            if( event.target === ne.node ) {
+                nw.cy( ne.cy() );
+                se.cx( ne.cx() );
+            };
+            if( event.target === sw.node ) {
+                nw.cx( sw.cx() );
+                se.cy( sw.cy() );
+            };
+            if( event.target === se.node ) {
+                ne.cx( se.cx() );
+                sw.cy( se.cy() );
+            };
 
-        broadcastNoteState(noteInfo,'dragmove');
-        updateMinimap(svg);
+            let newbb = {'w':ne.cx()-nw.cx(),'h':sw.cy()-ne.cy()};
+            noteInfo.width = newbb.w;
+            noteInfo.height = newbb.h;
+            noteInfo.x = nw.cx();
+            noteInfo.y = nw.cy();
+
+            let newNote = makeNote(svg,noteInfo);
+            item = newNote;
+
+            // Adjust the four side handles
+            n.center(item.x()+newbb.w/2,item.y()        );
+            s.center(item.x()+newbb.w/2,item.y()+newbb.h);
+            w.center(item.x()        ,  item.y()+newbb.h/2);
+            e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
+
+            broadcastNoteState(noteInfo,'dragmove');
+            updateMinimap(svg);
+        };
+
+        n.on("dragmove", dragmove_side );
+        e.on("dragmove", dragmove_side );
+        s.on("dragmove", dragmove_side );
+        w.on("dragmove", dragmove_side );
+
+        nw.on("dragmove",dragmove_corner);
+        sw.on("dragmove",dragmove_corner);
+        ne.on("dragmove",dragmove_corner);
+        se.on("dragmove",dragmove_corner);
+
+        let dragend = () => {
+            let currInfo = getNoteInfo(SVG.get(singleItem));
+            addAction('scale',
+                () => { makeNote(svg, currInfo )},
+                () => { makeNote(svg, noteInfo )},
+            );
+        };
+        n.on("dragend", dragend );
+        e.on("dragend", dragend );
+        s.on("dragend", dragend );
+        w.on("dragend", dragend );
+        nw.on("dragend",dragend );
+        sw.on("dragend",dragend );
+        ne.on("dragend",dragend );
+        se.on("dragend",dragend );
     };
-
-    let dragmove_corner = (event) => {
-        let item = SVG.get(singleItem);
-        let noteInfo = getNoteInfo(item);
-
-        let info = {
-            from : { x: null, y: null },
-            to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
-        };
-
-        // Find which handle we moved, and adjust the two neighbouring
-        // handles accordingly...
-        if( event.target === nw.node ) {
-            sw.cx( nw.cx() );
-            ne.cy( nw.cy() );
-        };
-        if( event.target === ne.node ) {
-            nw.cy( ne.cy() );
-            se.cx( ne.cx() );
-        };
-        if( event.target === sw.node ) {
-            nw.cx( sw.cx() );
-            se.cy( sw.cy() );
-        };
-        if( event.target === se.node ) {
-            ne.cx( se.cx() );
-            sw.cy( se.cy() );
-        };
-
-        let newbb = {'w':ne.cx()-nw.cx(),'h':sw.cy()-ne.cy()};
-        noteInfo.width = newbb.w;
-        noteInfo.height = newbb.h;
-        noteInfo.x = nw.cx();
-        noteInfo.y = nw.cy();
-
-        let newNote = makeNote(svg,noteInfo);
-        item = newNote;
-
-        // Adjust the four side handles
-        n.center(item.x()+newbb.w/2,item.y()        );
-        s.center(item.x()+newbb.w/2,item.y()+newbb.h);
-        w.center(item.x()        ,  item.y()+newbb.h/2);
-        e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
-
-        broadcastNoteState(noteInfo,'dragmove');
-        updateMinimap(svg);
-    };
-
-    n.on("dragmove", dragmove_side );
-    e.on("dragmove", dragmove_side );
-    s.on("dragmove", dragmove_side );
-    w.on("dragmove", dragmove_side );
-
-    nw.on("dragmove",dragmove_corner);
-    sw.on("dragmove",dragmove_corner);
-    ne.on("dragmove",dragmove_corner);
-    se.on("dragmove",dragmove_corner);
-
-    let dragend = () => {
-        let currInfo = getNoteInfo(SVG.get(singleItem));
-        addAction('scale',
-            () => { makeNote(svg, currInfo )},
-            () => { makeNote(svg, noteInfo )},
-        );
-    };
-    n.on("dragend", dragend );
-    e.on("dragend", dragend );
-    s.on("dragend", dragend );
-    w.on("dragend", dragend );
-    nw.on("dragend",dragend );
-    sw.on("dragend",dragend );
-    ne.on("dragend",dragend );
-    se.on("dragend",dragend );
 
     // Scale the toolbar inverse to our zoom, so the size in pixels remains
     let obb = overlay.bbox(); // Adjust for sides of the viewbox, later
@@ -861,12 +900,8 @@ function addSelectionOverlay(svg1,singleItem) {
     toolbar.y(obb.y - tbb.height - 8*scale);
     toolbar.scale(scale);
     let icon = svg.select( ".currentcolor", toolbar).first();
-    if( item && item.hasClass('typeNote')) {
-        let noteInfo = getNoteInfo(item); // if type='note' ...
-        if( ! item ) {
-            console.log("No item found for id '"+singleItem+"' (?!)");
-        };
-        icon.fill(noteInfo.color);
+    if( shapeInfo.type === 'note') {
+        icon.fill(shapeInfo.color);
     };
 
     let layer = SVG.get('displayLayerUI');
