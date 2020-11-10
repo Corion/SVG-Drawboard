@@ -598,10 +598,11 @@ function addSelectionOverlay(svg1,singleItem) {
     let scale = 1/svg.viewbox().zoom;
 
     let item = SVG.get(singleItem);
-    let noteInfo = getNoteInfo(item); // if type='note' ...
     if( ! item ) {
-        console.log("No item found for id '"+singleItem+"' (?!)");
+        console.log("No item found to select by name", singleItem);
+        return;
     };
+
     let mainItem = SVG.select('.main',item.node).first();
     let bb = mainItem.bbox();
     let overlay = svg.group().attr({"id":"overlay"});
