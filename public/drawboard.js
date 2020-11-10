@@ -449,16 +449,19 @@ document.onmousedown = (e) => {
         isPanning = true;
         panStartPoint = {x:e.x,y:e.y};
         panStartViewbox = svg.viewbox();
+        svg.node.style.setProperty('cursor','grabbing');
     };
 }
 
 document.onmouseup = (e) => {
     if( e.which === 2) { // Middle button pans
         isPanning = false;
+        svg.node.style.setProperty('cursor','default');
     };
 }
 
 document.onwheel = function(e) {
+    // let svg = new SVG('svgUI');
     if( svg.node.contains(e.target) ) {
         e.preventDefault();
         let viewbox = svg.viewbox();
@@ -605,56 +608,56 @@ function addSelectionOverlay(svg1,singleItem) {
     overlay.data("overlaid",item,true); // We want to store an object reference
 
     // Add eight svg.circle() as handles for sizing the selection
-    let w = svg.circle(8*scale);
+    let w = svg.circle(8*scale).attr({'cursor':'w-resize'});
     w.center(0+item.x(),item.y()+bb.h/2);
     w.draggy((x,y) => {
         return {"x":x,"y":false}
     });
     overlay.add(w);
 
-    let e = svg.circle(8*scale);
+    let e = svg.circle(8*scale).attr({'cursor':'e-resize'});
     e.center(bb.w+item.x(),item.y()+bb.h/2);
     e.draggy((x,y) => {
         return {"x":x,"y":false}
     });
     overlay.add(e);
 
-    let n = svg.circle(8*scale);
+    let n = svg.circle(8*scale).attr({'cursor':'n-resize'});
     n.center(bb.w/2+item.x(),item.y()+0);
     n.draggy((x,y) => {
         return {"x":false,"y":y}
     });
     overlay.add(n);
 
-    let s = svg.circle(8*scale);
+    let s = svg.circle(8*scale).attr({'cursor':'s-resize'});
     s.center(bb.w/2+item.x(),item.y()+bb.h);
     s.draggy((x,y) => {
         return {"x":false,"y":y}
     });
     overlay.add(s);
 
-    let nw = svg.circle(8*scale);
+    let nw = svg.circle(8*scale).attr({'cursor':'nw-resize'});
     nw.center(0+item.x(),0+item.y());
     nw.draggy((x,y) => {
         return {"x":x,"y":y}
     });
     overlay.add(nw);
 
-    let ne = svg.circle(8*scale);
+    let ne = svg.circle(8*scale).attr({'cursor':'ne-resize'});
     ne.center(item.x()+bb.w,0+item.y());
     ne.draggy((x,y) => {
         return {"x":x,"y":y}
     });
     overlay.add(ne);
 
-    let se = svg.circle(8*scale);
+    let se = svg.circle(8*scale).attr({'cursor':'se-resize'})
     se.center(item.x()+bb.w,bb.h+item.y());
     se.draggy((x,y) => {
         return {"x":x,"y":y}
     });
     overlay.add(se);
 
-    let sw = svg.circle(8*scale);
+    let sw = svg.circle(8*scale).attr({'cursor':'sw-resize'})
     sw.center(item.x()+0,bb.h+item.y());
     sw.draggy((x,y) => {
         return {"x":x,"y":y}
