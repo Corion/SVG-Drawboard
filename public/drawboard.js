@@ -787,7 +787,13 @@ function addSelectionOverlay(svg1,singleItem) {
     toolbar.y(obb.y - tbb.height - 8*scale);
     toolbar.scale(scale);
     let icon = svg.select( ".currentcolor", toolbar).first();
-    icon.fill(noteInfo.color);
+    if( item && item.hasClass('typeNote')) {
+        let noteInfo = getNoteInfo(item); // if type='note' ...
+        if( ! item ) {
+            console.log("No item found for id '"+singleItem+"' (?!)");
+        };
+        icon.fill(noteInfo.color);
+    };
 
     let layer = SVG.get('displayLayerUI');
     layer.add(overlay);
