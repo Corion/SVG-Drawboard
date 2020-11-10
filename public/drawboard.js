@@ -1156,8 +1156,6 @@ function exportAsSvg(svgId) {
  *         a) Transfer the current server state, losing all local edits
  *         b) better sync, from the time of last sync onwards, in both
  *            directions. This will be hard.
- *     Remove the selection UI if the selection is discarded by clicking on the
- *       canvas itself
  *     Multi-note selection should scale the notes by using a matrix to scale
  *     Consider https://github.com/tabler/tabler-icons for the toolbar icons
  *     Add zoom+ and zoom- (and 100%) buttons besides the minimap
