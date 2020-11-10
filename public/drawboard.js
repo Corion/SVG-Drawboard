@@ -278,6 +278,7 @@ function selectTool(tool) {
 
                 let info = {
                     "id" : id,
+                    type: "note",
                     x : documentLoc.x,
                     y : documentLoc.y,
                     width : 100,
@@ -287,7 +288,7 @@ function selectTool(tool) {
 
                 addAction('new note',
                     () => {
-                        let note = makeNote(svg, info);
+                        let shape = makeNote(svg, info);
                     },
                     () => {
                         deleteItems(svg, [ id ], true);
@@ -1094,14 +1095,21 @@ function exportAsSvg(svgId) {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
+ *     Add "line" as a shape, after "note"
+ *         Look at SVG line shapes "(-" , "<-" and ">-"
+ *     Add "connector" as a shape
  *     Add "loading" animation while initializing
+ *     Shapes:
+ *         - text (like a note, except without the background)
+ *         - circle, ellipse (like a note, except round)
+ *         - line / connector
  *     Implement rendering of multiple <TSPAN> lines properly
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
  *     Implement moving notes to back/front
  *     Implement editing layers, or at least a background layer
  *         We'll need at least two editing layers:
- *         Notes etc.
+ *         Notes/Shapes etc.
  *         Background (only selectable in a special mode)
  *     Implement defined "bookmark" zones where you can one-click to move/zoom to
  *         Would these live on the background?
@@ -1127,7 +1135,7 @@ function exportAsSvg(svgId) {
  *         replaying/placing all the active parts.
  *     Implement replay/reupload of the SVG from the JSON describing the SVG
  *     Implement upload of random SVGs (?)
- *     Create item from template
+ *     Create shape from template
  *         database table template
  *         person template
  *     Implement "join as guest" gateway page that asks for username and password
