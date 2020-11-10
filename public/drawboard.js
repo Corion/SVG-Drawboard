@@ -676,6 +676,7 @@ function addSelectionOverlay(svg1,singleItem) {
         return;
     };
 
+    let shapeInfo = getShapeInfo(item);
     let mainItem = SVG.select('.main',item.node).first();
     let bb = mainItem.bbox();
     let overlay = svg.group().attr({"id":"overlay"});
@@ -872,6 +873,35 @@ function addSelectionOverlay(svg1,singleItem) {
     layer.add(overlay);
 
     return overlay
+}
+
+function getShapeInfo( shape ) {
+    if( shape.hasClass('typeLine')) {
+        return getLineInfo( shape )
+    } else if( shape.hasClass( 'typeNote' )) {
+        return getNoteInfo( shape )
+    } else {
+        console.log("Unknown shape",shape);
+        return;
+    };
+}
+
+function getLineInfo( line ) {
+    let t = SVG.select('.text', line.node).first();
+    let bb = line.bbox();
+    let points = SVG.select('.main', line.node).first().array();
+    let color = SVG.select('.main', line.node).first().attr('stroke');
+    return {
+        type   : 'line',
+        id     : line.attr('id'),
+        text   : t.text(),
+        "color": color,
+        startX : line.x() + points.value[0][0],
+        startY : line.y() + points.value[0][1],
+        endX   : line.x() + points.value[1][0],
+        endY   : line.y() + points.value[1][1],
+        width  : 1,
+    };
 }
 
 function getNoteInfo( note ) {
@@ -1098,7 +1128,7 @@ function makeLine(svg, attrs) {
                 attrs.startY-leftUpper.y,
                 attrs.endX-leftUpper.x,
                 attrs.endY-leftUpper.y
-            ).stroke({ width: 1 });
+            ).stroke({ width: 1, "color":color });
     l.addClass('main');
     let bb = l.bbox();
 
@@ -1121,30 +1151,32 @@ function makeLine(svg, attrs) {
         };
     });
 
-/*
     g.draggy();
     g.beforedrag = (e) => {
         // We only want to drag with the (primary) mouse button
         return e.which === 1
     };
     let dragging;
-    let oldNoteState = attrs;
+    let oldShapeState = attrs;
     g.on("dragstart", (event) => {
         dragging = true;
     });
     g.on("dragend", (event) => {
         if( dragging ) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
-            let nodeInfo = getNoteInfo(event.target.instance);
+            let shapeInfo = getShapeInfo(event.target.instance);
 
-            if(    nodeInfo.x != attrs.x
-                || nodeInfo.y != attrs.y ) {
+            if(    shapeInfo.startX != attrs.startX
+                || shapeInfo.startY != attrs.startY
+                || shapeInfo.endX != attrs.endX
+                || shapeInfo.endY != attrs.endY
+              ) {
                 addAction('move/scale',
-                    () => { makeNote(svg, nodeInfo )},
-                    () => { makeNote(svg, attrs )},
+                    () => { makeLine(svg, shapeInfo )},
+                    () => { makeLine(svg, attrs )},
                 );
 
-                broadcastNoteState(nodeInfo,'dragend');
+                broadcastNoteState(shapeInfo,'dragend');
                 updateMinimap(svg);
             };
         };
@@ -1157,7 +1189,7 @@ function makeLine(svg, attrs) {
             updateMinimap(svg);
         };
     });
-*/
+
     if( attrs.id ) {
         let oldNode = SVG.get(attrs.id);
         if( oldNode && oldNode.parent() ) {
