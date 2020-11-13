@@ -1002,7 +1002,7 @@ function makeUser(svg, info ) {
         layer.add(g);
 
         let minimap = SVG.get('displayLayerMinimap');
-        let r = minimap.rect(info.vx, info.vy, info.vwidt, info.vheight);
+        let r = minimap.rect(info.vx, info.vy, info.vwidth, info.vheight);
         r.attr({
             "stroke"       : info.usercolor,
             "stroke-width" : "4",
