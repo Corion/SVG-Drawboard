@@ -72,7 +72,13 @@ body { margin: 0px; border: 0px; padding: 0px; } /* go fullpage */
     <g id="displayLayerBackground"></g>
     <g id="displayLayerNotes"></g>
     <g id="displayLayerCursors"></g>
-    <g id="displayLayerUI"></g>
+    <g id="displayLayerUI">
+        <!-- We need to dynamically reposition these, so they are hidden at the start -->
+        <rect id="uiScrollbarH" height="12" width="100%" fill="#f0f0f0" x="0" y="0"></rect>
+        <rect id="uiScrollposH" height="12" width="100%" fill="#0f0f0f" x="0" y="0"></rect>
+        <rect id="uiScrollbarV" height="100%" width="12" fill="#f0f0f0" x="0" y="0"></rect>
+        <rect id="uiScrollposV" height="100%" width="12" fill="#0f0f0f" x="0" y="0"></rect>
+    </g>
     <!--
     <g id="displayLayerInitializing"></g>
     -->

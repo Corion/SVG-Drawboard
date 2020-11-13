@@ -82,7 +82,7 @@ function onMessage(event) {
             if( moveOverlay ) {
                 addSelectionOverlay(svg, msg.info.id);
             };
-            updateMinimap(svg);
+            updateUIControls(svg);
 
         } else if( "delete" === msg.action ) {
             deleteItems(svg, [msg.info.id], false);
@@ -443,8 +443,40 @@ function updateMinimap() {
     let rUserView = SVG.get('userView');
 }
 
+// Yay, creating our own controls ...
+function updateScrollbars() {
+    let viewbox = svg.viewbox();
+
+    let H = SVG.get('uiScrollbarH');
+    let pH = SVG.get('uiScrollposH');
+    H.height( 12 / viewbox.zoom );
+    H.width( viewbox.width );
+    H.x( viewbox.x );
+    H.y( viewbox.y + viewbox.height - H.height() );
+
+    pH.height( 12 / viewbox.zoom );
+    pH.y( viewbox.y + viewbox.height - pH.height() );
+
+    let V = SVG.get('uiScrollbarV');
+    let pV = SVG.get('uiScrollposV');
+    V.height( viewbox.height );
+    V.width( 12 / viewbox.zoom );
+    V.x( viewbox.x + viewbox.width - V.width() );
+    V.y( viewbox.y );
+
+    pV.width( 12 / viewbox.zoom );
+    pV.x( viewbox.x + viewbox.width - pV.width() );
+}
+
+function updateUIControls() {
+    updateMinimap();
+    updateScrollbars();
+}
+
 function setClientViewbox(cursorX, cursorY, newViewBox) {
         svg.viewbox(newViewBox);
+
+        updateScrollbars();
 
         // Broadcast the new client rectangle
         broadcastClientCursor(cursorX, cursorY);
@@ -559,6 +591,7 @@ document.onwheel = function(e) {
             let containedId = oldOverlay.data("overlaid");
             addSelectionOverlay(svg, containedId);
         };
+        updateScrollbars();
         broadcastClientCursor(documentLoc.x, documentLoc.y);
     };
     // Otherwise, handle it as default
@@ -585,7 +618,7 @@ function deleteItems(svg,items,local) {
             };
         };
     };
-    updateMinimap(svg);
+    updateUIControls(svg);
 }
 
 function deleteCurrentSelection() {
@@ -704,7 +737,7 @@ function addSelectionOverlay(svg1,singleItem) {
             let newLine = makeLine( svg, newDims );
 
             // broadcastNoteState(shapeInfo,'dragmove');
-            updateMinimap(svg);
+            updateUIControls(svg);
         };
         s.on("dragmove", dragmove);
         s.on("dragend",  dragmove);
@@ -814,7 +847,7 @@ function addSelectionOverlay(svg1,singleItem) {
             e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
             broadcastNoteState(noteInfo,'dragmove');
-            updateMinimap(svg);
+            updateUIControls(svg);
         };
 
         let dragmove_corner = (event) => {
@@ -861,7 +894,7 @@ function addSelectionOverlay(svg1,singleItem) {
             e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
             broadcastNoteState(noteInfo,'dragmove');
-            updateMinimap(svg);
+            updateUIControls(svg);
         };
 
         n.on("dragmove", dragmove_side );
@@ -1099,7 +1132,7 @@ function makeNote(svg, attrs) {
                 );
 
                 broadcastNoteState(nodeInfo,'dragend');
-                updateMinimap(svg);
+                updateUIControls(svg);
             };
         };
     });
@@ -1108,7 +1141,7 @@ function makeNote(svg, attrs) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
             let nodeInfo = getNoteInfo(event.target.instance);
             broadcastNoteState(nodeInfo,'dragmove');
-            updateMinimap(svg);
+            updateUIControls(svg);
         };
     });
 
@@ -1131,7 +1164,7 @@ function makeNote(svg, attrs) {
     let layer = SVG.get('displayLayerNotes');
     layer.add(g);
 
-    updateMinimap(svg);
+    updateUIControls(svg);
 
     return g
 }
@@ -1212,7 +1245,7 @@ function makeLine(svg, attrs) {
                 );
 
                 broadcastNoteState(shapeInfo,'dragend');
-                updateMinimap(svg);
+                updateUIControls(svg);
             };
         };
     });
@@ -1221,7 +1254,7 @@ function makeLine(svg, attrs) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
             let nodeInfo = getNoteInfo(event.target.instance);
             broadcastNoteState(nodeInfo,'dragmove');
-            updateMinimap(svg);
+            updateUIControls(svg);
         };
     });
 
@@ -1244,7 +1277,7 @@ function makeLine(svg, attrs) {
     let layer = SVG.get('displayLayerNotes');
     layer.add(g);
 
-    updateMinimap(svg);
+    updateUIControls(svg);
 
     return g
 }
