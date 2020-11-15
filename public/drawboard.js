@@ -469,33 +469,34 @@ function updateScrollbars() {
      *
      */
 
-    let viewable = {
-        width : Math.max( viewbox.width  * viewbox.width  / docSize.width,  1 ),
-        height: Math.max( viewbox.height * viewbox.height / docSize.height, 1 ),
-        // relative X and Y positions need to be shifted by negative offsets
-        x     : (viewbox.x - docSize.x) / docSize.width  * viewbox.width,
-        y     : (viewbox.y - docSize.y) / docSize.height * viewbox.height,
-    };
-
     let H = SVG.get('uiScrollbarH');
     let pH = SVG.get('uiScrollposH');
-    H.height( 12 / viewbox.zoom );
-    H.width( viewbox.width );
+    let widgetWidth = 12 / viewbox.zoom;
+    H.height( widgetWidth );
+    H.width( viewbox.width - widgetWidth );
     H.x( viewbox.x );
     H.y( viewbox.y + viewbox.height - H.height() );
+
+    let V = SVG.get('uiScrollbarV');
+    let pV = SVG.get('uiScrollposV');
+    V.height( viewbox.height - widgetWidth );
+    V.width( widgetWidth );
+    V.x( viewbox.x + viewbox.width - V.width() );
+    V.y( viewbox.y );
+
+    let viewable = {
+        width : Math.max( H.width()  * viewbox.width  / docSize.width,  1 ),
+        height: Math.max( V.height() * viewbox.height / docSize.height, 1 ),
+        // relative X and Y positions need to be shifted by negative offsets
+        x     : (viewbox.x - docSize.x) / docSize.width  * H.width(),
+        y     : (viewbox.y - docSize.y) / docSize.height * V.height(),
+    };
 
     pH.height( 12 / viewbox.zoom );
     pH.width( viewable.width );
         //left corner + scaled distance
     pH.x( viewbox.x   + viewable.x );
     pH.y( viewbox.y + viewbox.height - pH.height() );
-
-    let V = SVG.get('uiScrollbarV');
-    let pV = SVG.get('uiScrollposV');
-    V.height( viewbox.height );
-    V.width( 12 / viewbox.zoom );
-    V.x( viewbox.x + viewbox.width - V.width() );
-    V.y( viewbox.y );
 
     pV.width( 12 / viewbox.zoom );
     pV.height( viewable.height );
