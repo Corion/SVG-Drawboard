@@ -436,8 +436,14 @@ function setupMinimap(id) {
     DOMminimap.onmousemove = doUpdateMinimap;
 };
 
+function getDocSize() {
+    let background = svgUsedRange(SVG.get('displayLayerBackground'));
+    let shapes     = svgUsedRange(SVG.get('displayLayerNotes'));
+    return background.merge(shapes);
+}
+
 function updateMinimap() {
-    documentInfo.dimensions = svgUsedRange(svg);
+    documentInfo.dimensions = getDocSize();
     // update viewport of the minimap accordingly
     let minimap = SVG.get('svgMinimap');
     minimap.viewbox(documentInfo.dimensions);
@@ -447,6 +453,7 @@ function updateMinimap() {
 // Yay, creating our own controls ...
 function updateScrollbars() {
     let viewbox = svg.viewbox();
+    let docSize = getDocSize();
 
     let H = SVG.get('uiScrollbarH');
     let pH = SVG.get('uiScrollposH');
