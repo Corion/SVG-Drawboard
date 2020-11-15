@@ -392,7 +392,8 @@ function svgUsedRange(svg) {
     let children = svg.children();
     let el;
     children.forEach( (el) =>{
-        bbox = bbox.merge( el.bbox() );
+        let childbox = el.rbox(svg);
+        bbox = bbox.merge( childbox );
     });
     return bbox;
 }
