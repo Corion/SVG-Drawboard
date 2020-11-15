@@ -448,12 +448,34 @@ function updateMinimap() {
     let minimap = SVG.get('svgMinimap');
     minimap.viewbox(documentInfo.dimensions);
     let rUserView = SVG.get('userView');
+
+    // Shouldn't we draw the user rectangle here as well?!
 }
 
 // Yay, creating our own controls ...
 function updateScrollbars() {
     let viewbox = svg.viewbox();
     let docSize = getDocSize();
+
+    docSize = docSize.merge( viewbox );
+
+    /*
+     *
+     *    [-------|-----------|-----------]          Zoomed out
+     *    <-viewbox  <-docsize-> viewbox ->
+     *
+     *    |----------[------------]-----------|      Zoomed in
+     *    <-docsize  <- viewbox ->   docsize->
+     *
+     */
+
+    let viewable = {
+        width : Math.max( viewbox.width  * viewbox.width  / docSize.width,  1 ),
+        height: Math.max( viewbox.height * viewbox.height / docSize.height, 1 ),
+        // relative X and Y positions need to be shifted by negative offsets
+        x     : (viewbox.x - docSize.x) / docSize.width  * viewbox.width,
+        y     : (viewbox.y - docSize.y) / docSize.height * viewbox.height,
+    };
 
     let H = SVG.get('uiScrollbarH');
     let pH = SVG.get('uiScrollposH');
@@ -463,6 +485,9 @@ function updateScrollbars() {
     H.y( viewbox.y + viewbox.height - H.height() );
 
     pH.height( 12 / viewbox.zoom );
+    pH.width( viewable.width );
+        //left corner + scaled distance
+    pH.x( viewbox.x   + viewable.x );
     pH.y( viewbox.y + viewbox.height - pH.height() );
 
     let V = SVG.get('uiScrollbarV');
@@ -473,12 +498,15 @@ function updateScrollbars() {
     V.y( viewbox.y );
 
     pV.width( 12 / viewbox.zoom );
+    pV.height( viewable.height );
+    pV.y( viewbox.y + viewable.y );
     pV.x( viewbox.x + viewbox.width - pV.width() );
 }
 
 function updateUIControls() {
     updateMinimap();
     updateScrollbars();
+    console.log(getDocSize());
 }
 
 function setClientViewbox(cursorX, cursorY, newViewBox) {
