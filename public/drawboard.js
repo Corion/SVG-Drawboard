@@ -68,7 +68,7 @@ function onMessage(event) {
 
     if( msg.boardname == boardname ) {
         // console.log(msg.action);
-        if( /^(dragend|dragmove|textedit)$/.test(msg.action)) {
+        if( /^(make|dragend|dragmove|textedit)$/.test(msg.action)) {
             // Last edit wins
             // We need to handle the user selection
             let oldOverlay = SVG.get("overlay");
@@ -289,7 +289,8 @@ function selectTool(tool) {
 
                 addAction('new note',
                     () => {
-                        let shape = makeNote(svg, info);
+                        let shape = makeShape(svg, info);
+                        broadcastNoteState(shapeInfo,'make');
                     },
                     () => {
                         deleteItems(svg, [ id ], true);
@@ -358,7 +359,8 @@ function selectTool(tool) {
 
                     addAction('new line',
                         () => {
-                            let shape = makeLine(svg, info);
+                            let shape = makeShape(svg, info);
+                            broadcastNoteState(info,'make');
                         },
                         () => {
                             deleteItems(svg, [ id ], true);
