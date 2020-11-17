@@ -78,7 +78,7 @@ function onMessage(event) {
                 moveOverlay = containedId === msg.info.id;
             };
 
-            makeNote(svg,msg.info);
+            makeShape(svg,msg.info);
             if( moveOverlay ) {
                 addSelectionOverlay(svg, msg.info.id);
             };
@@ -672,8 +672,8 @@ function colorCurrentSelection() {
     if( overlay ) {
         let containedId = overlay.data("overlaid");
         let item = SVG.get(containedId);
-        let noteInfo = getNoteInfo(item);
-        noteInfo.color = config.usercolor;
+        let shapeInfo = getShapeInfo(item);
+        shapeInfo.color = config.usercolor;
         updateShape(svg,containedId, shapeInfo);
     };
 }
@@ -683,15 +683,15 @@ function chooseColorCurrentSelection() {
     if( overlay ) {
         let containedId = overlay.data("overlaid");
         let item = SVG.get(containedId);
-        let noteInfo = getNoteInfo(item);
+        let shapeInfo = getShapeInfo(item);
         let colorPicker = document.createElement('input');
         colorPicker.type = 'color';
-        colorPicker.value = noteInfo.color;
+        colorPicker.value = shapeInfo.color;
         colorPicker.href = '#';
         colorPicker.onchange = (e) => {
-            if( colorPicker.value != noteInfo.color ) {
-                let prevNoteInfo = { ...noteInfo };
-                noteInfo.color = colorPicker.value;
+            if( colorPicker.value != shapeInfo.color ) {
+                let prevInfo = { ...shapeInfo };
+                shapeInfo.color = colorPicker.value;
                 addAction('set color',
                     () => {
                         updateShape(svg,containedId, shapeInfo);
@@ -703,7 +703,7 @@ function chooseColorCurrentSelection() {
 
                 let icon = svg.select( ".currentcolor", toolbar).first();
                 if( icon ) {
-                    icon.fill(noteInfo.color);
+                    icon.fill(shapeInfo.color);
                 };
             };
         };
@@ -970,9 +970,7 @@ function addSelectionOverlay(svg1,singleItem) {
     toolbar.y(obb.y - tbb.height - 8*scale);
     toolbar.scale(scale);
     let icon = svg.select( ".currentcolor", toolbar).first();
-    if( shapeInfo.type === 'note') {
-        icon.fill(shapeInfo.color);
-    };
+    icon.fill(shapeInfo.color);
 
     let layer = SVG.get('displayLayerUI');
     layer.add(overlay);
@@ -1375,14 +1373,7 @@ function startTextEditing( event ) {
 
 function mkNodes(nodes) {
     for (let node of nodes) {
-        switch (node.type) {
-            case "note":
-                makeNote(svg,node);
-                break;
-            default:
-                console.log("Unknown node type " + node.type, node);
-                break;
-        }
+        makeShape(svg,node);
     }
 }
 
