@@ -177,11 +177,11 @@ function broadcastClientCursor(x,y) {
     });
 }
 
-let throttledBroadcastNoteState = mkThrottledBroadcaster(100,["id"]);
-function broadcastNoteState(noteInfo,eventname) {
+let throttledBroadcastShapeState = mkThrottledBroadcaster(100,["id"]);
+function broadcastShapeState(noteInfo,eventname) {
     // Debounce this just like client cursors, except keyed on the note id
     // as well.
-    throttledBroadcastNoteState({
+    throttledBroadcastShapeState({
         info: noteInfo,
         id: noteInfo.id,
         user: config.username,
@@ -290,7 +290,7 @@ function selectTool(tool) {
                 addAction('new note',
                     () => {
                         let shape = makeShape(svg, info);
-                        broadcastNoteState(shapeInfo,'make');
+                        broadcastShapeState(info,'make');
                     },
                     () => {
                         deleteItems(svg, [ id ], true);
@@ -360,7 +360,7 @@ function selectTool(tool) {
                     addAction('new line',
                         () => {
                             let shape = makeShape(svg, info);
-                            broadcastNoteState(info,'make');
+                            broadcastShapeState(info,'make');
                         },
                         () => {
                             deleteItems(svg, [ id ], true);
@@ -648,7 +648,7 @@ function deleteItems(svg,items,local) {
         if( item ) {
             if( local ) {
                 let info = getNoteInfo(item); // for undo
-                broadcastNoteState(info,'delete');
+                broadcastShapeState(info,'delete');
             };
             item.remove();
 
@@ -775,7 +775,7 @@ function addSelectionOverlay(svg1,singleItem) {
 
             let newLine = makeLine( svg, newDims );
 
-            broadcastNoteState(newDims,'dragmove');
+            broadcastShapeState(newDims,'dragmove');
             updateUIControls(svg);
         };
         s.on("dragmove", dragmove);
@@ -885,7 +885,7 @@ function addSelectionOverlay(svg1,singleItem) {
             w.center(item.x()        ,  item.y()+newbb.h/2);
             e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
-            broadcastNoteState(noteInfo,'dragmove');
+            broadcastShapeState(noteInfo,'dragmove');
             updateUIControls(svg);
         };
 
@@ -932,7 +932,7 @@ function addSelectionOverlay(svg1,singleItem) {
             w.center(item.x()        ,  item.y()+newbb.h/2);
             e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
-            broadcastNoteState(noteInfo,'dragmove');
+            broadcastShapeState(noteInfo,'dragmove');
             updateUIControls(svg);
         };
 
@@ -1168,7 +1168,7 @@ function makeNote(svg, attrs) {
                     () => { makeNote(svg, attrs )},
                 );
 
-                broadcastNoteState(nodeInfo,'dragend');
+                broadcastShapeState(nodeInfo,'dragend');
                 updateUIControls(svg);
             };
         };
@@ -1177,7 +1177,7 @@ function makeNote(svg, attrs) {
         if( dragging ) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
             let nodeInfo = getNoteInfo(event.target.instance);
-            broadcastNoteState(nodeInfo,'dragmove');
+            broadcastShapeState(nodeInfo,'dragmove');
             updateUIControls(svg);
         };
     });
@@ -1221,7 +1221,7 @@ function makeShape( svg, attrs ) {
 function updateShape(svg, shape, attrs) {
     console.log("Updating shape with", attrs);
     let newShape = makeShape( svg, attrs );
-    broadcastNoteState(getShapeInfo(newShape),'textedit');
+    broadcastShapeState(getShapeInfo(newShape),'textedit');
     return newShape;
 }
 
@@ -1293,7 +1293,7 @@ function makeLine(svg, attrs) {
                     () => { updateShape(svg, id, attrs )},
                 );
 
-                // broadcastNoteState(getShapeInfo(newShape),'dragend');
+                // broadcastShapeState(getShapeInfo(newShape),'dragend');
                 updateUIControls(svg);
             };
         };
@@ -1302,7 +1302,7 @@ function makeLine(svg, attrs) {
         if( dragging ) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
             let shapeInfo = getShapeInfo(event.target.instance);
-            broadcastNoteState(shapeInfo,'dragmove');
+            broadcastShapeState(shapeInfo,'dragmove');
             updateUIControls(svg);
         };
     });
