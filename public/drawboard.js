@@ -217,8 +217,8 @@ function leaveEditingMode() {
             if( info.text != oldInfo.text ) {
 
                 addAction('edit text',
-                    () => { updateNote(svg, info.id, info); },
-                    () => { updateNote(svg, oldInfo.id, oldInfo); },
+                    () => { updateShape(svg, info.id, info); },
+                    () => { updateShape(svg, oldInfo.id, oldInfo); },
                 );
             };
             state.editedNode = undefined;
@@ -674,7 +674,7 @@ function colorCurrentSelection() {
         let item = SVG.get(containedId);
         let noteInfo = getNoteInfo(item);
         noteInfo.color = config.usercolor;
-        updateNote(svg,containedId, noteInfo);
+        updateShape(svg,containedId, shapeInfo);
     };
 }
 
@@ -694,10 +694,10 @@ function chooseColorCurrentSelection() {
                 noteInfo.color = colorPicker.value;
                 addAction('set color',
                     () => {
-                        updateNote(svg,containedId, noteInfo);
+                        updateShape(svg,containedId, shapeInfo);
                     },
                     () => {
-                        updateNote(svg,containedId, prevNoteInfo);
+                        updateShape(svg,containedId, prevInfo);
                     }
                 );
 
@@ -1206,13 +1206,24 @@ function makeNote(svg, attrs) {
     return g
 }
 
-function updateNote(svg, note, attrs) {
-    // console.log("Switched out of text editing", event.target);
-    console.log("Updating note with", attrs);
-    let newNote = makeNote( svg, attrs );
-    broadcastNoteState(getNoteInfo(newNote),'textedit');
-    return newNote;
-};
+function makeShape( svg, attrs ) {
+    switch( attrs.type ) {
+        case "line": return makeLine( svg, attrs );
+                     break;
+        case "note": return makeNote( svg, attrs );
+                     break;
+        default:
+                     console.log("Unknown shape type", attrs);
+                     return;
+    }
+}
+
+function updateShape(svg, shape, attrs) {
+    console.log("Updating shape with", attrs);
+    let newShape = makeShape( svg, attrs );
+    broadcastNoteState(getShapeInfo(newShape),'textedit');
+    return newShape;
+}
 
 // Creates or replaces a line
 function makeLine(svg, attrs) {
