@@ -775,7 +775,7 @@ function addSelectionOverlay(svg1,singleItem) {
 
             let newLine = makeLine( svg, newDims );
 
-            // broadcastNoteState(shapeInfo,'dragmove');
+            broadcastNoteState(newDims,'dragmove');
             updateUIControls(svg);
         };
         s.on("dragmove", dragmove);
@@ -1279,7 +1279,8 @@ function makeLine(svg, attrs) {
     });
     g.on("dragend", (event) => {
         if( dragging ) {
-            addSelectionOverlay(svg, event.target.instance.attr('id'));
+            let id = event.target.instance.attr('id');
+            addSelectionOverlay(svg, id);
             let shapeInfo = getShapeInfo(event.target.instance);
 
             if(    shapeInfo.startX != attrs.startX
@@ -1288,11 +1289,11 @@ function makeLine(svg, attrs) {
                 || shapeInfo.endY != attrs.endY
               ) {
                 addAction('move/scale',
-                    () => { makeLine(svg, shapeInfo )},
-                    () => { makeLine(svg, attrs )},
+                    () => { updateShape(svg, id, shapeInfo ); },
+                    () => { updateShape(svg, id, attrs )},
                 );
 
-                broadcastNoteState(shapeInfo,'dragend');
+                // broadcastNoteState(getShapeInfo(newShape),'dragend');
                 updateUIControls(svg);
             };
         };
@@ -1300,8 +1301,8 @@ function makeLine(svg, attrs) {
     g.on("dragmove", (event) => {
         if( dragging ) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
-            let nodeInfo = getNoteInfo(event.target.instance);
-            broadcastNoteState(nodeInfo,'dragmove');
+            let shapeInfo = getShapeInfo(event.target.instance);
+            broadcastNoteState(shapeInfo,'dragmove');
             updateUIControls(svg);
         };
     });
