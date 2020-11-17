@@ -217,8 +217,8 @@ function leaveEditingMode() {
             if( info.text != oldInfo.text ) {
 
                 addAction('edit text',
-                    () => { updateShape(svg, info.id, info); },
-                    () => { updateShape(svg, oldInfo.id, oldInfo); },
+                    () => { updateShape(svg, info); },
+                    () => { updateShape(svg, oldInfo); },
                 );
             };
             state.editedNode = undefined;
@@ -676,7 +676,7 @@ function colorCurrentSelection() {
         let item = SVG.get(containedId);
         let shapeInfo = getShapeInfo(item);
         shapeInfo.color = config.usercolor;
-        updateShape(svg,containedId, shapeInfo);
+        updateShape(svg, shapeInfo);
     };
 }
 
@@ -696,10 +696,10 @@ function chooseColorCurrentSelection() {
                 shapeInfo.color = colorPicker.value;
                 addAction('set color',
                     () => {
-                        updateShape(svg,containedId, shapeInfo);
+                        updateShape(svg, shapeInfo);
                     },
                     () => {
-                        updateShape(svg,containedId, prevInfo);
+                        updateShape(svg, prevInfo);
                     }
                 );
 
@@ -1218,7 +1218,7 @@ function makeShape( svg, attrs ) {
     }
 }
 
-function updateShape(svg, shape, attrs) {
+function updateShape(svg, attrs) {
     console.log("Updating shape with", attrs);
     let newShape = makeShape( svg, attrs );
     broadcastShapeState(getShapeInfo(newShape),'textedit');
@@ -1289,8 +1289,8 @@ function makeLine(svg, attrs) {
                 || shapeInfo.endY != attrs.endY
               ) {
                 addAction('move/scale',
-                    () => { updateShape(svg, id, shapeInfo ); },
-                    () => { updateShape(svg, id, attrs )},
+                    () => { updateShape(svg, shapeInfo ); },
+                    () => { updateShape(svg, attrs )},
                 );
 
                 // broadcastShapeState(getShapeInfo(newShape),'dragend');
