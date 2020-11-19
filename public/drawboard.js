@@ -552,7 +552,7 @@ function updateScrollbars() {
 function updateUIControls() {
     updateMinimap();
     updateScrollbars();
-    console.log(getDocSize());
+    //console.log(getDocSize());
 }
 
 function setClientViewbox(cursorX, cursorY, newViewBox) {
