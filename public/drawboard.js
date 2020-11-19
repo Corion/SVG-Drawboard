@@ -1589,8 +1589,9 @@ function exportAsSvg(svgId) {
  *     Add "loading" animation while initializing
  *     Shapes:
  *         - text (like a note, except without the background)
- *         - circle, ellipse (like a note, except round)
  *         - line / connector
+ *         - biig arrow, with text
+ *           This would be a polyline, filled, and the text centered in it?!
  *     Implement rendering of multiple <TSPAN> lines properly
  *     Implement handling of multiline input into <TSPAN>
  *     Implement white-black-white border around (single) selected item(s)
