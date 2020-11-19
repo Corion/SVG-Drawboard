@@ -1579,9 +1579,13 @@ function exportAsSvg(svgId) {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
- *     Add "line" as a shape, after "note"
- *         Look at SVG line shapes "(-" , "<-" and ">-"
+ *     Buttons for undo/redo
+ *     Move undo/redo from closures to messages
+ *         This allows us to undo/redo remotely as well
+ *     Allow text editing for lines
+ *     Look at SVG line endings "(-" , "<-" and ">-"
  *     Add "connector" as a shape
+ *         First round, connectors can connect to the 8 points of a shape
  *     Add "loading" animation while initializing
  *     Shapes:
  *         - text (like a note, except without the background)
@@ -1611,7 +1615,8 @@ function exportAsSvg(svgId) {
  *     Implement touch support for moving an element (separate move handle)
  *     Implement support for rotation
  *     Implement tool modes beyond "select" and "create"
- *         Paste-color for example
+ *         Paste-color/copy style
+ *         Text size/style/font
  *     Implement touch support for rotating (separate rotation handle)
  *     Implement download of the SVG, and download of a JSON describing the SVG
  *         This can be done by constructing the SVG client-side and then eliminating
@@ -1652,6 +1657,7 @@ function exportAsSvg(svgId) {
  *         SWOT
  *         Business Canvas
  *     Automatically choose the text color based on the background brightness
+ *     Add a benchmark for document initial load, we should support 3k+ elements
  */
 
 // Bugs
