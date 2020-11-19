@@ -204,7 +204,7 @@ function leaveEditingMode() {
         if( editedNode && ! editedNode.node.contains( event.target )) {
             console.log("Left editing note",state.editedNode);
             let bb = SVG.select('.main', editedNode.node).first().bbox();
-            let info = getNoteInfo(editedNode);
+            let info = getShapeInfo(editedNode);
             let oldInfo = { ...info };
             let textdiv = SVG.select('div', state.editedForeign.node).first();
             info.text = textdiv.node.innerText;
@@ -647,7 +647,7 @@ function deleteItems(svg,items,local) {
         let item = SVG.get(id);
         if( item ) {
             if( local ) {
-                let info = getNoteInfo(item); // for undo
+                let info = getShapeInfo(item); // for undo
                 broadcastShapeState(info,'delete');
             };
             item.remove();
@@ -854,24 +854,24 @@ function addSelectionOverlay(svg1,singleItem) {
         // Also, log any moving, for later communication
         let dragmove_side = (event) => {
             let item = SVG.get(singleItem);
-            let noteInfo = getNoteInfo(item);
+            let shapeInfo = getShapeInfo(item);
 
             // Reconstruct width/height, then set it
             let newbb = {'w':e.cx()-w.cx(),'h':s.cy()-n.cy()};
             //console.log(e,newbb.w);
-            noteInfo.width = newbb.w;
-            noteInfo.height = newbb.h;
-            noteInfo.x = w.cx();
-            noteInfo.y = n.cy();
+            shapeInfo.width = newbb.w;
+            shapeInfo.height = newbb.h;
+            shapeInfo.x = w.cx();
+            shapeInfo.y = n.cy();
             //console.log(newbb.w);
-            let newNote = makeNote(svg,noteInfo);
+            let newShape = makeShape(svg,shapeInfo);
 
             let info = {
                 from : { x: null, y: null },
                 to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
             };
 
-            item = newNote;
+            item = newShape;
 
             // Adjust the four corner handles
             nw.center(item.x(),        item.y());
@@ -885,13 +885,13 @@ function addSelectionOverlay(svg1,singleItem) {
             w.center(item.x()        ,  item.y()+newbb.h/2);
             e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
-            broadcastShapeState(noteInfo,'dragmove');
+            broadcastShapeState(shapeInfo,'dragmove');
             updateUIControls(svg);
         };
 
         let dragmove_corner = (event) => {
             let item = SVG.get(singleItem);
-            let noteInfo = getNoteInfo(item);
+            let shapenfo = getShapeInfo(item);
 
             let info = {
                 from : { x: null, y: null },
@@ -918,13 +918,13 @@ function addSelectionOverlay(svg1,singleItem) {
             };
 
             let newbb = {'w':ne.cx()-nw.cx(),'h':sw.cy()-ne.cy()};
-            noteInfo.width = newbb.w;
-            noteInfo.height = newbb.h;
-            noteInfo.x = nw.cx();
-            noteInfo.y = nw.cy();
+            shapeInfo.width = newbb.w;
+            shapeInfo.height = newbb.h;
+            shapeInfo.x = nw.cx();
+            shapeInfo.y = nw.cy();
 
-            let newNote = makeNote(svg,noteInfo);
-            item = newNote;
+            let newShape = makeShape(svg,shapeInfo);
+            item = newShape;
 
             // Adjust the four side handles
             n.center(item.x()+newbb.w/2,item.y()        );
@@ -932,7 +932,7 @@ function addSelectionOverlay(svg1,singleItem) {
             w.center(item.x()        ,  item.y()+newbb.h/2);
             e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
 
-            broadcastShapeState(noteInfo,'dragmove');
+            broadcastShapeState(shapeInfo,'dragmove');
             updateUIControls(svg);
         };
 
@@ -947,10 +947,10 @@ function addSelectionOverlay(svg1,singleItem) {
         se.on("dragmove",dragmove_corner);
 
         let dragend = () => {
-            let currInfo = getNoteInfo(SVG.get(singleItem));
+            let currInfo = getShapeInfo(SVG.get(singleItem));
             addAction('scale',
-                () => { makeNote(svg, currInfo )},
-                () => { makeNote(svg, noteInfo )},
+                () => { makeShape(svg, currInfo )},
+                () => { makeShape(svg, noteInfo )},
             );
         };
         n.on("dragend", dragend );
@@ -1159,13 +1159,13 @@ function makeNote(svg, attrs) {
     g.on("dragend", (event) => {
         if( dragging ) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
-            let nodeInfo = getNoteInfo(event.target.instance);
+            let nodeInfo = getShapeInfo(event.target.instance);
 
             if(    nodeInfo.x != attrs.x
                 || nodeInfo.y != attrs.y ) {
                 addAction('move/scale',
-                    () => { makeNote(svg, nodeInfo )},
-                    () => { makeNote(svg, attrs )},
+                    () => { makeShape(svg, nodeInfo )},
+                    () => { makeShape(svg, attrs )},
                 );
 
                 broadcastShapeState(nodeInfo,'dragend');
@@ -1176,7 +1176,7 @@ function makeNote(svg, attrs) {
     g.on("dragmove", (event) => {
         if( dragging ) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
-            let nodeInfo = getNoteInfo(event.target.instance);
+            let nodeInfo = getShapeInfo(event.target.instance);
             broadcastShapeState(nodeInfo,'dragmove');
             updateUIControls(svg);
         };
