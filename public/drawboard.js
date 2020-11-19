@@ -304,6 +304,49 @@ function selectTool(tool) {
             };
             break;
 
+        case "makeEllipse":
+            svg.node.style.setProperty('cursor','crosshair');
+            callback = (e) => {
+                let pt = new SVG.Point(e.clientX, e.clientY);
+                let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
+
+                // get/generate a unique id:
+                let shapes = SVG.select('.typeEllipse');
+                let offset = shapes.length();
+                let id = `ellipse_${offset}` ;
+                while( SVG.get(id)) {
+                    offset++;
+                    id = `ellipse_${offset}` ;
+                };
+
+
+                let info = {
+                    "id" : id,
+                    type: "ellipse",
+                    x : documentLoc.x,
+                    y : documentLoc.y,
+                    width : 100,
+                    height : 100,
+                    text: "enter text",
+                };
+
+                addAction('new note',
+                    () => {
+                        let shape = makeShape(svg, info);
+                        broadcastShapeState(info,'make');
+                    },
+                    () => {
+                        deleteItems(svg, [ id ], true);
+                    }
+                );
+
+                // XXX directly enter text entry mode?
+                addSelectionOverlay(svg, info.id);
+                /* reset cursor and tool */
+                selectTool("selector");
+            };
+            break;
+
         case "makeLine":
             svg.node.style.setProperty('cursor','crosshair');
 
@@ -791,7 +834,8 @@ function addSelectionOverlay(svg1,singleItem) {
         e.on("dragmove", dragmove);
         e.on("dragend",  dragmove);
 
-    } else if( shapeInfo.type === 'note') {
+    } else if( shapeInfo.type === 'note'
+             ||shapeInfo.type === 'ellipse') {
         // Rectangular selection overlay, for non-line shapes
 
         // Add eight svg.circle() as handles for sizing the selection
@@ -985,6 +1029,8 @@ function getShapeInfo( shape ) {
         return getLineInfo( shape )
     } else if( shape.hasClass( 'typeNote' )) {
         return getNoteInfo( shape )
+    } else if( shape.hasClass( 'typeEllipse' )) {
+        return getEllipseInfo( shape )
     } else {
         console.log("Unknown shape",shape);
         return;
@@ -1015,6 +1061,22 @@ function getNoteInfo( note ) {
     let color = SVG.select('.main', note.node).first().attr('fill');
     return {
         type   : 'note',
+        id     : note.attr('id'),
+        text   : t.text(),
+        "color": color,
+        x      : note.x(),
+        y      : note.y(),
+        width  : bb.width,
+        height : bb.height
+    };
+}
+
+function getEllipseInfo( note ) {
+    let t = SVG.select('.text', note.node).first();
+    let bb = SVG.select('.main', note.node).first().bbox();
+    let color = SVG.select('.main', note.node).first().attr('fill');
+    return {
+        type   : 'ellipse',
         id     : note.attr('id'),
         text   : t.text(),
         "color": color,
@@ -1212,6 +1274,8 @@ function makeShape( svg, attrs ) {
                      break;
         case "note": return makeNote( svg, attrs );
                      break;
+        case "ellipse": return makeEllipse( svg, attrs );
+                     break;
         default:
                      console.log("Unknown shape type", attrs);
                      return;
@@ -1303,6 +1367,100 @@ function makeLine(svg, attrs) {
             addSelectionOverlay(svg, event.target.instance.attr('id'));
             let shapeInfo = getShapeInfo(event.target.instance);
             broadcastShapeState(shapeInfo,'dragmove');
+            updateUIControls(svg);
+        };
+    });
+
+    if( attrs.id ) {
+        let oldNode = SVG.get(attrs.id);
+        if( oldNode && oldNode.parent() ) {
+            if( oldNode === g ) {
+                console.log("Old and new node are identical?!");
+            } else {
+                // console.log("Replacing old item", oldNode, g);
+                oldNode.replace( g );
+            };
+        };
+        g.attr('id', attrs.id);
+    } else {
+        // Assign our prefix here to prevent collisions with other clients
+        g.id(config.connection_prefix+"-"+g.id());
+    };
+
+    let layer = SVG.get('displayLayerNotes');
+    layer.add(g);
+
+    updateUIControls(svg);
+
+    return g
+}
+
+// Creates or replaces a circle/ellipse
+function makeEllipse(svg, attrs) {
+    // We create the text element first so our hand-rolled word wrapping
+    // works with the correct font parameters
+    let t = svg.text('').attr({"fill":"black","font-weight":"bold"});
+    t.addClass('text');
+    let text = wrapText(t, attrs.width, attrs.text).join("\n");
+    t.text(text);
+    let color = attrs.color || '#ffef40';
+    let b = svg.ellipse(attrs.width, attrs.height).attr({"fill":color,
+        "filter":"url(#shadow)",
+    });
+    b.addClass('main');
+    let bb = b.bbox();
+
+    var g = svg.group();
+    g.addClass('userElement');
+    g.addClass('typeEllipse'); // Maybe as data element instead?!
+    g.add(b);
+    g.add(t);
+
+    // Text is allowed to bleed out of the "paper"
+    t.center(bb.cx,bb.cy);
+    g.move(attrs.x, attrs.y);
+
+    t.on('click', startTextEditing);
+
+    g.on("mousedown", (event) => {
+        // We only want to select with the (primary) mouse button
+        if( event.which === 1 ) {
+            let overlay = addSelectionOverlay(svg, g.attr('id'));
+        };
+    });
+
+    g.draggy();
+    g.beforedrag = (e) => {
+        // We only want to drag with the (primary) mouse button
+        return e.which === 1
+    };
+    let dragging;
+    let oldNoteState = attrs;
+    g.on("dragstart", (event) => {
+        dragging = true;
+    });
+    g.on("dragend", (event) => {
+        if( dragging ) {
+            addSelectionOverlay(svg, event.target.instance.attr('id'));
+            let nodeInfo = getShapeInfo(event.target.instance);
+
+            if(    nodeInfo.x != attrs.x
+                || nodeInfo.y != attrs.y ) {
+                addAction('move/scale',
+                    () => { makeShape(svg, nodeInfo )},
+                    () => { makeShape(svg, attrs )},
+                );
+
+                broadcastShapeState(nodeInfo,'dragend');
+                updateUIControls(svg);
+            };
+        };
+    });
+    g.on("dragmove", (event) => {
+        if( dragging ) {
+            addSelectionOverlay(svg, event.target.instance.attr('id'));
+            let nodeInfo = getShapeInfo(event.target.instance);
+            broadcastShapeState(nodeInfo,'dragmove');
             updateUIControls(svg);
         };
     });
