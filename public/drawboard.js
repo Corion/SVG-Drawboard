@@ -1662,7 +1662,7 @@ function exportAsSvg(svgId) {
  *     Consider https://github.com/tabler/tabler-icons for the toolbar icons
  *     Add zoom+ and zoom- (and 100%) buttons besides the minimap
  *     Minimum zoom/maximum zoom?
- *     Add scrollbars to the border of the SVG for better scrolling
+ *     Make scrollbars clickable/draggable
  *     Make font identical between <text><tspan> and foreign divs
  *     Make tspans left/center/right-justifiable per-note
  *     Have example background templates
