@@ -564,6 +564,24 @@ function setClientViewbox(cursorX, cursorY, newViewBox) {
         broadcastClientCursor(cursorX, cursorY);
 }
 
+function cmdUndo() {
+    if( state.actionPrev > -1 ) {
+        console.log(`undoing ${state.actionPosition}: '${state.actionStack[state.actionPrev].visual}'`);
+        state.actionStack[state.actionPrev].undo();
+        state.actionPrev--;
+    };
+}
+
+function cmdRedo() {
+    // redo
+    let actionNext = state.actionPrev+1;
+    if( actionNext <= state.actionStack.length -1) {
+       console.log(`redoing ${actionNext}: '${state.actionStack[actionNext].visual}'`);
+       state.actionStack[actionNext].redo();
+       state.actionPrev = actionNext;
+    };
+}
+
 // Hotkeys
 document.onkeydown = (e) => {
     e = e || window.event;
@@ -582,19 +600,9 @@ document.onkeydown = (e) => {
                      console.log(e);
                      if( e.key.toUpperCase() === "Z" && e.ctrlKey ) {
                          // undo
-                         if( state.actionPrev > -1 ) {
-                            console.log(`undoing ${state.actionPosition}: '${state.actionStack[state.actionPrev].visual}'`);
-                            state.actionStack[state.actionPrev].undo();
-                            state.actionPrev--;
-                        };
+                         cmdUndo();
                      } else if(e.key.toUpperCase() === "Y" && e.ctrlKey) {
-                         // redo
-                         let actionNext = state.actionPrev+1;
-                         if( actionNext <= state.actionStack.length -1) {
-                            console.log(`redoing ${actionNext}: '${state.actionStack[actionNext].visual}'`);
-                            state.actionStack[actionNext].redo();
-                            state.actionPrev = actionNext;
-                         };
+                         cmdRedo();
                      };
                      if( state.actionPrev > -1 ) {
                          console.log( `Next undoable action: ${state.actionStack[state.actionPrev].visual}`);
@@ -1584,6 +1592,7 @@ function exportAsSvg(svgId) {
  *         This allows us to undo/redo remotely as well
  *     Allow text editing for lines
  *     Look at SVG line endings "(-" , "<-" and ">-"
+ *         <defs><marker></defs>
  *     Add "connector" as a shape
  *         First round, connectors can connect to the 8 points of a shape
  *     Add "loading" animation while initializing
@@ -1602,6 +1611,7 @@ function exportAsSvg(svgId) {
  *         Background (only selectable in a special mode)
  *     Implement defined "bookmark" zones where you can one-click to move/zoom to
  *         Would these live on the background? Or get their own layer
+ *     "Focus" on player, shape (by id)
  *     Implement (note) context menus
  *         "Send to background layer"
  *         "Send to foreground layer"
@@ -1629,6 +1639,8 @@ function exportAsSvg(svgId) {
  *     Implement upload of random SVGs (?)
  *     Create shape from template
  *         database table template
+ *             Could this be plain rectangular text? Or do we want a two-column
+ *             layout here? Maybe have a (programmed) template?!
  *         person template
  *     Implement "join as guest" gateway page that asks for username and password
  *     Implement permissions
