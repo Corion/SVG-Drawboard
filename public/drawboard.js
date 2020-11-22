@@ -1039,39 +1039,62 @@ function addSelectionOverlay(svg1,singleItem) {
                 to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
             };
 
+            shapeInfo.x = nw.cx();
+            shapeInfo.y = nw.cy();
             // Find which handle we moved, and adjust the two neighbouring
             // handles accordingly...
             if( event.target === nw.node ) {
-                sw.cx( nw.cx() );
-                ne.cy( nw.cy() );
-            };
-            if( event.target === ne.node ) {
-                nw.cy( ne.cy() );
-                se.cx( ne.cx() );
-            };
-            if( event.target === sw.node ) {
-                nw.cx( sw.cx() );
-                se.cy( sw.cy() );
-            };
-            if( event.target === se.node ) {
-                ne.cx( se.cx() );
-                sw.cy( se.cy() );
+                shapeInfo.width = Math.abs(se.cx() - nw.cx());
+                shapeInfo.height = Math.abs(se.cy() - nw.cy());
+
+            } else if( event.target === ne.node ) {
+                shapeInfo.width = Math.abs(ne.cx() - sw.cx());
+                shapeInfo.height = Math.abs(ne.cy() - sw.cy());
+                shapeInfo.y = ne.cy();
+
+            } else if( event.target === sw.node ) {
+                shapeInfo.width = Math.abs(ne.cx() - sw.cx());
+                shapeInfo.height = Math.abs(ne.cy() - sw.cy());
+                shapeInfo.x = sw.cx();
+
+            } else if( event.target === se.node ) {
+                shapeInfo.width = Math.abs(se.cx() - nw.cx());
+                shapeInfo.height = Math.abs(se.cy() - nw.cy());
             };
 
-            let newbb = {'w':ne.cx()-nw.cx(),'h':sw.cy()-ne.cy()};
-            shapeInfo.width = newbb.w;
-            shapeInfo.height = newbb.h;
-            shapeInfo.x = nw.cx();
-            shapeInfo.y = nw.cy();
+            //let newbb = {'w':ne.cx()-nw.cx(),'h':sw.cy()-ne.cy()};
+            if( scaleProportional ) {
+                let prop = orgShapeInfo.width / orgShapeInfo.height;
+                let factor = Math.max( newbb.w / orgShapeInfo.width, newbb.h /orgShapeInfo.height );
+
+/*
+                newbb.w = prop * factor * orgShapeInfo.width;
+                newbb.h = prop * factor * orgShapeInfo.height;
+                shapeInfo.width = newbb.w;
+                shapeInfo.height = newbb.h;
+*/
+            } else {
+                //shapeInfo.width = newbb.w;
+                //shapeInfo.height = newbb.h;
+            };
 
             let newShape = makeShape(svg,shapeInfo);
             item = newShape;
 
+            nw.cx( shapeInfo.x );
+            nw.cy( shapeInfo.y );
+            ne.cx( shapeInfo.x + shapeInfo.width );
+            ne.cy( shapeInfo.y );
+            sw.cx( shapeInfo.x );
+            sw.cy( shapeInfo.y + shapeInfo.height );
+            se.cx( shapeInfo.x + shapeInfo.width );
+            se.cy( shapeInfo.y + shapeInfo.height );
+
             // Adjust the four side handles
-            n.center(item.x()+newbb.w/2,item.y()        );
-            s.center(item.x()+newbb.w/2,item.y()+newbb.h);
-            w.center(item.x()        ,  item.y()+newbb.h/2);
-            e.center(item.x()+newbb.w,  item.y()+newbb.h/2);
+            n.center( shapeInfo.x+shapeInfo.width/2,shapeInfo.y        );
+            s.center( shapeInfo.x+shapeInfo.width/2,shapeInfo.y+shapeInfo.height);
+            w.center( shapeInfo.x                  ,shapeInfo.y+shapeInfo.height/2);
+            e.center( shapeInfo.x+shapeInfo.width  ,shapeInfo.y+shapeInfo.height/2);
 
             broadcastShapeState(shapeInfo,'dragmove');
             updateUIControls(svg);
