@@ -231,9 +231,9 @@ function addAction(visual,redo,undo) {
         state.actionStack.splice(state.actionPostion+1);
     };
     state.actionStack.push({
-        "visual": visual,
-        "redo": redo,
-        "undo": undo,
+        visual,
+        redo,
+        undo,
     });
     state.actionPrev = state.actionStack.length -1;
     console.log(`Action ${state.actionPrev}: ${visual}`);
