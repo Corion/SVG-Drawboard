@@ -139,7 +139,11 @@ function mkThrottledBroadcaster(delay,keycols) {
         info.latestMsg = msg;
 
         if( ! info.timerId ) {
-            uplink.send(JSON.stringify(msg));
+            try {
+                uplink.send(JSON.stringify(msg));
+            } catch (e) {
+                console.log(e);
+            };
             info.latestMsg = undefined;
 
             info.timerId = window.setTimeout(() => {
