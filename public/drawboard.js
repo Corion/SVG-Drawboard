@@ -1032,7 +1032,7 @@ function addSelectionOverlay(svg1,singleItem) {
 
         let dragmove_corner = (event) => {
             let item = SVG.get(singleItem);
-            let shapenfo = getShapeInfo(item);
+            let shapeInfo = getShapeInfo(item);
 
             let info = {
                 from : { x: null, y: null },
@@ -1091,7 +1091,7 @@ function addSelectionOverlay(svg1,singleItem) {
             let currInfo = getShapeInfo(SVG.get(singleItem));
             addAction('scale',
                 () => { makeShape(svg, currInfo )},
-                () => { makeShape(svg, noteInfo )},
+                () => { makeShape(svg, currInfo )},
             );
         };
         n.on("dragend", dragend );
