@@ -268,14 +268,7 @@ function selectTool(tool) {
                 let documentLoc = pt.transform(new SVG.Matrix(svg.node.getScreenCTM().inverse()));
 
                 // get/generate a unique id:
-                let notes = SVG.select('.typeNote');
-                let offset = notes.length();
-                let id = `note_${offset}` ;
-                while( SVG.get(id)) {
-                    offset++;
-                    id = `note_${offset}` ;
-                };
-
+                let id = getShapeId();
 
                 let info = {
                     "id" : id,
@@ -732,6 +725,21 @@ function deleteItems(svg,items,local) {
     updateUIControls(svg);
 }
 
+function getShapeId() {
+    // get/generate a unique id:
+    let shapes = SVG.select('.userElement');
+    let offset = shapes.length();
+    let id = `shape_${offset}` ;
+
+    // yeah, we could scan the found shapes for duplicates instead, but ...
+    while( SVG.get(id)) {
+        offset++;
+        id = `shape_${offset}` ;
+    };
+    return id
+}
+
+function duplicateItems(svg,items,local) {
 function deleteCurrentSelection() {
     let oldOverlay = SVG.get("overlay");
     if( oldOverlay ) {
