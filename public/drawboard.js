@@ -1676,6 +1676,8 @@ function exportAsSvg(svgId) {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
+ *     Add cut/copy/paste commands
+ *         https://developer.mozilla.org/en-US/docs/Web/API/Clipboard
  *     Move undo/redo from closures to messages
  *         This allows us to undo/redo remotely as well
  *     Allow text editing for lines
