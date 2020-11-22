@@ -1676,7 +1676,6 @@ function exportAsSvg(svgId) {
 // How will we handle the selection of multiple elements?!
 /*
  * Next steps:
- *     Buttons for undo/redo
  *     Move undo/redo from closures to messages
  *         This allows us to undo/redo remotely as well
  *     Allow text editing for lines
