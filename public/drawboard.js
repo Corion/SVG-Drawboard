@@ -981,7 +981,7 @@ function addSelectionOverlay(svg1,singleItem) {
         let se = svg.circle(8*scale).attr({'cursor':'se-resize'})
         se.center(item.x()+bb.w,bb.h+item.y());
         se.draggy((x,y) => {
-            return {"x":x,"y":y}
+            return {x,y}
         });
         overlay.add(se);
 
