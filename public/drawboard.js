@@ -474,15 +474,32 @@ function setupMinimap(id) {
             setClientViewbox(documentLoc.x, documentLoc.y, movedViewBox);
         };
     };
+    DOMminimap.ontouchstart =
     DOMminimap.onmousedown = (e) => {
         minimapPanning = true;
+        e.preventDefault();
+        if( e.changedTouches ) {
+            e = e.changedTouches[0];
+        };
         doUpdateMinimap(e);
     };
+    DOMminimap.ontouchend =
     DOMminimap.onmouseup = (e) => {
+        e.preventDefault();
+        if( e.changedTouches ) {
+            e = e.changedTouches[0];
+        };
         doUpdateMinimap(e);
         minimapPanning = false;
     };
-    DOMminimap.onmousemove = doUpdateMinimap;
+    DOMminimap.ontouchmove =
+    DOMminimap.onmousemove = (e) => {
+        e.preventDefault();
+        if( e.changedTouches ) {
+            e = e.changedTouches[0];
+        };
+        doUpdateMinimap(e);
+    };
 };
 
 function getDocSize() {
