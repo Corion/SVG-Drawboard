@@ -127,8 +127,6 @@ function updateConfig(aConfig) {
 // Returns a function that will throttle
 function mkThrottledBroadcaster(delay,keycols) {
     // Our information about the last messages sent
-    // Later, clean out message keys after 1s (or whatever) to prevent
-    // bloating the list of last messages sent
     let lastItem = {};
     return (msg) => {
         let key = (keycols.map( (k) => { msg[k] } )).join("\0");
@@ -150,6 +148,8 @@ function mkThrottledBroadcaster(delay,keycols) {
                     info.latestMsg = undefined;
                 };
                 info.timerId = undefined;
+                // Clean up the key we set up to act as throttler
+                delete lastItem[key];
             }, delay);
         };
     }
