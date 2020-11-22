@@ -609,6 +609,12 @@ document.onkeydown = (e) => {
             // "B" - showNavigationPane
             // "<space>" - (while held down) selectPanTool
 
+            case 68: if( e.ctrlKey ) { // CTRL+D , conflicts with bookmarks
+                         e.preventDefault();
+                         cmdDuplicateSelection();
+                     };
+                     break;
+
             case 89:
             case 90: // "Z","Y" - undo (we only support azerty/qwerty/qwertz here)
                      console.log(e);
@@ -740,6 +746,60 @@ function getShapeId() {
 }
 
 function duplicateItems(svg,items,local) {
+    let result = [];
+    let redo = [];
+    let undo = [];
+    for( let id of items ) {
+        let item = SVG.get(id);
+        if( item ) {
+            if( local ) {
+                let info = getShapeInfo(item);
+                info.id = getShapeId(); // file off the serial number
+
+                if( info.type === "line" ) {
+                    info.startX += 10;
+                    info.startY += 10;
+                    info.endX += 10;
+                    info.endY += 10;
+                } else {
+                    info.x += 10;
+                    info.y += 10;
+                };
+                redo.push(info);
+                undo.push(info.id);
+            };
+        };
+    };
+
+    addAction('duplicate',
+        () => {
+            for( let info of redo ) {
+                let newShape = makeShape(svg, info);
+                result.push(newShape);
+
+                // This shouldn't be per single item, but for all at once
+                broadcastShapeState(info,'make');
+            };
+        },
+        () => {
+            deleteItems(svg, undo )
+        },
+    );
+
+    updateUIControls(svg);
+    return result;
+}
+
+function cmdDuplicateSelection() {
+    let oldOverlay = SVG.get("overlay");
+    if( oldOverlay ) {
+        let containedId = oldOverlay.data("overlaid");
+        oldOverlay.remove();
+        let newItems = duplicateItems(svg, [ containedId ], true);
+        addSelectionOverlay( svg, newItems[0]);
+    };
+}
+
 function deleteCurrentSelection() {
     let oldOverlay = SVG.get("overlay");
     if( oldOverlay ) {

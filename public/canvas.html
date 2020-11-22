@@ -49,12 +49,13 @@ body { margin: 0px; border: 0px; padding: 0px; } /* go fullpage */
 </head>
 <body onload="javascript:initDrawboard('svg1')">
 <div class="navigation"><nav><a href="../">Home</a></nav>
-<button onclick="javascript:cmdUndo()" href="#">Undo</button>
-<button onclick="javascript:cmdRedo()" href="#">Redo</button>
-<button onclick="javascript:selectTool('makeNote')" href="#">New note</button>
-<button onclick="javascript:selectTool('makeEllipse')" href="#">New ellipse</button>
-<button onclick="javascript:selectTool('makeLine')" href="#">New line</button>
-<button onclick="javascript:exportAsSvg('svg1')" href="#">Download</button>
+<button id="cmdUndo" onclick="javascript:cmdUndo()" href="#">Undo</button>
+<button id="cmdRedo" onclick="javascript:cmdRedo()" href="#">Redo</button>
+<button id="cmdDuplicate" onclick="javascript:cmdDuplicateSelection()" href="#">Duplicate</button>
+<button id="cmdMakeNote" onclick="javascript:selectTool('makeNote')" href="#">New note</button>
+<button id="cmdMakeEllipse" onclick="javascript:selectTool('makeEllipse')" href="#">New ellipse</button>
+<button id="cmdMakeLine" onclick="javascript:selectTool('makeLine')" href="#">New line</button>
+<button id="cmdExport" onclick="javascript:exportAsSvg('svg1')" href="#">Download</button>
 </div>
 <div class="nojs">You need Javascript to use this application</div>
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" id="svg1" >
