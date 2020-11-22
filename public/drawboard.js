@@ -1030,13 +1030,28 @@ function addSelectionOverlay(svg1,singleItem) {
             updateUIControls(svg);
         };
 
+        let orgShapeInfo;
+        let dragstart = (event) => {
+            let item = SVG.get(singleItem);
+            orgShapeInfo = getShapeInfo(item);
+        };
+
         let dragmove_corner = (event) => {
             let item = SVG.get(singleItem);
             let shapeInfo = getShapeInfo(item);
 
+            let scaleProportional = event.detail.event.ctrlKey;
+            // console.log(event);
+
             let info = {
                 from : { x: null, y: null },
                 to   : { x: event.detail.event.pageX, y: event.detail.event.pageY }
+            };
+
+            // By what axis does the northeast corner move
+            let anchor = {
+                dx: false,
+                dy: false,
             };
 
             shapeInfo.x = nw.cx();
@@ -1047,14 +1062,21 @@ function addSelectionOverlay(svg1,singleItem) {
                 shapeInfo.width = Math.abs(se.cx() - nw.cx());
                 shapeInfo.height = Math.abs(se.cy() - nw.cy());
 
+                anchor.dx = true;
+                anchor.dy = true;
+
             } else if( event.target === ne.node ) {
                 shapeInfo.width = Math.abs(ne.cx() - sw.cx());
                 shapeInfo.height = Math.abs(ne.cy() - sw.cy());
+
+                anchor.dy = true;
                 shapeInfo.y = ne.cy();
 
             } else if( event.target === sw.node ) {
                 shapeInfo.width = Math.abs(ne.cx() - sw.cx());
                 shapeInfo.height = Math.abs(ne.cy() - sw.cy());
+
+                anchor.dx = true;
                 shapeInfo.x = sw.cx();
 
             } else if( event.target === se.node ) {
@@ -1062,20 +1084,22 @@ function addSelectionOverlay(svg1,singleItem) {
                 shapeInfo.height = Math.abs(se.cy() - nw.cy());
             };
 
-            //let newbb = {'w':ne.cx()-nw.cx(),'h':sw.cy()-ne.cy()};
             if( scaleProportional ) {
                 let prop = orgShapeInfo.width / orgShapeInfo.height;
-                let factor = Math.max( newbb.w / orgShapeInfo.width, newbb.h /orgShapeInfo.height );
 
-/*
-                newbb.w = prop * factor * orgShapeInfo.width;
-                newbb.h = prop * factor * orgShapeInfo.height;
-                shapeInfo.width = newbb.w;
-                shapeInfo.height = newbb.h;
-*/
-            } else {
-                //shapeInfo.width = newbb.w;
-                //shapeInfo.height = newbb.h;
+                let candidateWidth = shapeInfo.height * prop;
+                let errorWidth = (shapeInfo.width-candidateWidth)**2;
+                let candidateHeight = shapeInfo.width / prop;
+                let errorHeight = (shapeInfo.height-candidateHeight)**2;
+
+                if( errorWidth < errorHeight ) {
+                    shapeInfo.width = candidateWidth;
+                } else {
+                    shapeInfo.height = candidateHeight;
+                };
+
+                shapeInfo.x = anchor.dx ? se.cx() - shapeInfo.width : shapeInfo.x;
+                shapeInfo.y = anchor.dy ? se.cy() - shapeInfo.height : shapeInfo.y;
             };
 
             let newShape = makeShape(svg,shapeInfo);
@@ -1099,6 +1123,11 @@ function addSelectionOverlay(svg1,singleItem) {
             broadcastShapeState(shapeInfo,'dragmove');
             updateUIControls(svg);
         };
+
+        nw.on("dragstart",dragstart);
+        sw.on("dragstart",dragstart);
+        ne.on("dragstart",dragstart);
+        se.on("dragstart",dragstart);
 
         n.on("dragmove", dragmove_side );
         e.on("dragmove", dragmove_side );
