@@ -248,7 +248,7 @@ function selectTool(tool) {
     leaveEditingMode();
 
     modeTool = tool;
-    let modeEvent = "click";
+    let modeEvent = ["click"];
     switch (tool) {
         case "selector":
             svg.node.style.setProperty('cursor','default');
@@ -352,7 +352,7 @@ function selectTool(tool) {
 
             // How can we immediately drag a line if we want to only listen
             // to "click" below? Maybe we need to add a type of event as well?!
-            modeEvent = "mousedown";
+            modeEvent = ["mousedown"];
             callback = (e) => {
                 // Well, we only want button 1:
                 if( e.which !== 1 ) {
@@ -423,12 +423,16 @@ function selectTool(tool) {
     }
 
     if( callback ) {
-        svg.off(modeEvent);
-        svg.on(modeEvent, callback);
+        for(let e of modeEvent) {
+            svg.off(e);
+            svg.on(e, callback);
+        };
     } else {
         // Can we always switch off the callback? This conflicts with
         // the normal selection ...
-        svg.off(modeEvent);
+        for(let e of modeEvent) {
+            svg.off(e);
+        };
     };
 }
 
